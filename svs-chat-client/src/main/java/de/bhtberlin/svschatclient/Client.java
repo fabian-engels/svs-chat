@@ -20,21 +20,27 @@ public class Client {
         
         int port = 9600;
         int recivePort = 9602;
+        InetAddress ia = InetAddress.getByName("localhost");
         
-        InetAddress ia = InetAddress.getByName("37.5.38.43");
-        DatagramPacket dm;
+        
         DatagramSocket ds = new DatagramSocket(port); //UDP
         DatagramSocket reciveDs = new DatagramSocket(recivePort);
         
         String s = "Wer andere links liegen lässt, steht rechts.";
         byte[] data = s.getBytes();
-        dm = new DatagramPacket(data, data.length, ia, port);
         
+        DatagramPacket dm = new DatagramPacket(data, data.length, ia, port);
+               
         try {
             ds.send(dm);
+            ds.close();
             
             reciveDs.receive(dm);
-            System.out.println(dm.getData().toString());
+            reciveDs.close();
+            
+            byte[] buffer = dm.getData();
+                String text = new String(buffer);
+                System.out.println("Received Data: " + text);
             
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
