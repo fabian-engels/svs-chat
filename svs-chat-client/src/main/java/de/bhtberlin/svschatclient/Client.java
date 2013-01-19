@@ -19,7 +19,7 @@ public class Client {
     public static void main( String[] args ) throws SocketException, UnknownHostException{
         
         int port = 7070;
-        int recivePort = 7072;
+        int recivePort = 9602;
         InetAddress ia = InetAddress.getByName("localhost");
         
         DatagramSocket ds = new DatagramSocket(port); //UDP
@@ -37,7 +37,6 @@ public class Client {
             ds.send(dPackage);
             ds.close();
             
-            dPackage.setPort(9602);
             reciveDs.receive(dPackage);
                        
             byte[] buffer = dPackage.getData();
