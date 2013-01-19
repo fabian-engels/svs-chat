@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * SVS UDP Client Chat v0.01
  * Sven Höche, Fabian Engels
- *
+ * timeout, server
  */
 public class Client {
     
@@ -42,6 +42,9 @@ public class Client {
         this.dsocket = new DatagramSocket(port); //UDP
         this.reciveDsocket = new DatagramSocket(recivePort);
         
+        Thread receiverThread = new Thread(new ReceiverThread(recivePort));
+        receiverThread.start();
+        
         try {
             while(!inputLine.equalsIgnoreCase("/close")){
                 this.inputLine = in.nextLine();
@@ -51,13 +54,9 @@ public class Client {
 
                 this.dPackage.setPort(9600);
                 this.dsocket.send(dPackage);
-
-                reciveDsocket.receive(dPackage);
-
-                byte[] buffer = dPackage.getData();
-                    String text = new String(buffer,"UTF8");
-                    System.out.println("Received Data: " + text);           
             }
+            receiverThread.interrupt();
+            System.exit(0);
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -79,6 +78,36 @@ public class Client {
             this.port = Integer.parseInt(inPut[1]);
         }else{
             askForPort();
+        }
+    }
+    
+    public class ReceiverThread extends Thread{
+
+        private DatagramSocket reciveDsocket;
+        
+        public ReceiverThread(final int receivePort) throws SocketException{
+            this.reciveDsocket = new DatagramSocket(receivePort);
+        }
+        
+        @Override
+        public void interrupt(){
+            super.interrupt();
+            reciveDsocket.close();
+        }
+        
+        @Override
+        public void run() {
+            try {
+                while(true){
+                    reciveDsocket.receive(dPackage);
+
+                    byte[] buffer = dPackage.getData();
+                        String text = new String(buffer,"UTF8");
+                        System.out.println("Received Data: " + text);
+                }
+                } catch (IOException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                }
         }
     }
 }
