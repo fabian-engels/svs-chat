@@ -27,7 +27,7 @@ public class Server
                 System.out.println("Received Data: " + text);
                 InetAddress address = packet.getAddress();
                 packet.setAddress(address);
-                packet.setPort(packet.getPort()+2);
+                packet.setPort(9602);
                 
                 sendSocket = new DatagramSocket(9602);
                 sendSocket.send(packet);
