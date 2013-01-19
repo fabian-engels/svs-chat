@@ -17,56 +17,66 @@ import java.util.logging.Logger;
  */
 public class Client {
     
-    private static Scanner in = new Scanner(System.in);
-    private static int port = -1;
+    private Scanner in;
+    private int port = -1;
     
-    public static void main( String[] args ) throws SocketException, UnknownHostException{
-        
-        int recivePort = 9602;
-        String inputLine = "";
-        byte[] data;
-        
+    private final int recivePort = 9602;
+    private String inputLine = "";
+    private byte[] data;
+    
+    private DatagramSocket dsocket;
+    private DatagramSocket reciveDsocket;
+    private InetAddress ia;
+    private DatagramPacket dPackage;
+          
+    public Client() throws UnknownHostException{
+        this.ia = InetAddress.getByName("37.5.38.43");
+        this.in = new Scanner(System.in);
+    }
+    
+    public void run() throws SocketException {
         if(port == -1){
             askForPort();
         }
         
-        InetAddress ia = InetAddress.getByName("37.5.38.43");
-        DatagramSocket dsocket = new DatagramSocket(port); //UDP
-        DatagramSocket reciveDsocket = new DatagramSocket(recivePort);
-                  
+        this.dsocket = new DatagramSocket(port); //UDP
+        this.reciveDsocket = new DatagramSocket(recivePort);
+        
         try {
             while(!inputLine.equalsIgnoreCase("/close")){
-                inputLine = in.nextLine();
-                data = inputLine.getBytes();
+                this.inputLine = in.nextLine();
+                this.data = inputLine.getBytes();
+                
+                this.dPackage = new DatagramPacket(data, data.length, ia, port);
 
-//                System.out.println("Sendet data length: " + data.length);
-
-                DatagramPacket dPackage = new DatagramPacket(data, data.length, ia, port);
-
-                dPackage.setPort(9600);
-                dsocket.send(dPackage);
+                this.dPackage.setPort(9600);
+                this.dsocket.send(dPackage);
 
                 reciveDsocket.receive(dPackage);
 
                 byte[] buffer = dPackage.getData();
                     String text = new String(buffer,"UTF8");
                     System.out.println("Received Data: " + text);           
-
             }
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public static void askForPort(){
+    public static void main( String[] args ) throws SocketException, UnknownHostException{
+        Client client = new Client();
+        client.run();
+    }
+    
+    public void askForPort(){
         
         System.out.println("Please choose a server port! (/port ...)");
         
-        String[] inPut = in.nextLine().split(" ");
+        String[] inPut = this.in.nextLine().split(" ");
         
         if(inPut[0].contains("/port") && inPut.length != 1 && inPut[1].matches("\\d+")){
             System.out.println("/port " + inPut[1] + " set.");
-            port = Integer.parseInt(inPut[1]);
+            this.port = Integer.parseInt(inPut[1]);
         }else{
             askForPort();
         }
