@@ -1,53 +1,100 @@
 package de.bhtberlin.svschatserver;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
- * SVS UDP Client Chat v0.01
- * Sven Höche, Fabian Engels
+ * SVS UDP Chat Server
+ *
+ * @author Fabian Engels, Sven Höche
  *
  */
-public class Server 
-{
-    public static void main( String[] args )
-    {
-        DatagramSocket sendSocket;
-        DatagramSocket serverSocket;
-        DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
-        Set <InetAddress> clients = new HashSet();
-        try{
-            serverSocket = new DatagramSocket(9600);
-            while(true){
-                serverSocket.receive(packet);
-                System.out.println("Received from IP:" + packet.getAddress());
-                byte[] buffer = packet.getData();
-                String text = new String(buffer, "UTF8");
-                
-                System.out.println("Received Data: " + text);
-                InetAddress sourceAddr = packet.getAddress();
-                clients.add(sourceAddr);
-                if(text.equalsIgnoreCase("close")){
-                  clients.remove(sourceAddr);  
-                }
-                packet.setPort(9602);
-                sendSocket = new DatagramSocket(9601);
-                for(InetAddress iaddr: clients){
-                    packet.setAddress(iaddr);
-                    sendSocket.send(packet);
-                }
-                sendSocket.close();
-                System.out.println("Packet got send!");
+public class Server {
+
+    private DatagramSocket sendSocket;
+    private DatagramSocket serverSocket;
+    private DatagramPacket packet;
+    private Set<InetAddress> clients;
+    final Integer receivePort = 9600;
+    final Integer sendPort = 9601;
+
+    public Server() {
+        this.packet = new DatagramPacket(new byte[1024], 1024);
+        this.clients = new HashSet();
+    }
+
+    public void run() {
+        try {
+            this.serverSocket = new DatagramSocket(this.receivePort);
+            this.sendSocket = new DatagramSocket(this.sendPort);
+        } catch (SocketException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            this.serverSocket.close();
+            this.sendSocket.close();
+        }
+        while (true) {
+
+            try {
+                this.serverSocket.receive(this.packet);
+            } catch (IOException ex) {
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }catch(SocketException ex){
-            System.err.println(ex);
-        } catch (IOException ex) {
-            System.err.println(ex);
+
+            InetAddress srcAddress = packet.getAddress();
+            System.out.println("Received from IP:" + srcAddress);
+            this.clients.add(srcAddress);
+
+            execCommands(packet);
+            responde(packet);
+        }
+    }
+
+    public static void main(String[] args) {
+        Server server = new Server();
+        server.run();
+    }
+
+    void responde(DatagramPacket packet) {
+        packet.setPort(9602);
+        for (InetAddress iaddr : clients) {
+            try {
+                packet.setAddress(iaddr);
+                this.sendSocket.send(packet);
+            } catch (IOException ex) {
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        System.out.println("Packet got send!");
+    }
+
+    void execCommands(DatagramPacket packet) {
+        byte[] data = packet.getData();
+        String text = null;
+        try {
+            text = new String(data, "UTF8");
+            System.out.println("Received Data: " + text);
+
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        Pattern closePat = Pattern.compile("/close");
+        Pattern unknownPat = Pattern.compile("unknown");
+
+        if (closePat.matcher(text).matches()) {
+            clients.remove(packet.getAddress());
+        }
+        if (unknownPat.matcher(text).matches()) {
+            //TODO notify new client
         }
     }
 }
