@@ -29,6 +29,8 @@ public class Client {
         String s = "Wer andere links liegen lässt, steht rechts.";
         byte[] data = s.getBytes();
         
+        System.out.println("Sendet data length: " + data.length);
+        
         DatagramPacket dm = new DatagramPacket(data, data.length, ia, port);
                
         try {
@@ -36,12 +38,13 @@ public class Client {
             ds.close();
             
             reciveDs.receive(dm);
-            reciveDs.close();
-            
+                       
             byte[] buffer = dm.getData();
                 String text = new String(buffer);
                 System.out.println("Received Data: " + text);
             
+            reciveDs.close();                
+                
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
