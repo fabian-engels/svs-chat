@@ -19,9 +19,8 @@ public class Client {
     public static void main( String[] args ) throws SocketException, UnknownHostException{
         
         int port = 7070;
-        int recivePort = 9602;
+        int recivePort = 7072;
         InetAddress ia = InetAddress.getByName("localhost");
-        
         
         DatagramSocket ds = new DatagramSocket(port); //UDP
         DatagramSocket reciveDs = new DatagramSocket(recivePort);
@@ -42,10 +41,8 @@ public class Client {
             reciveDs.receive(dPackage);
                        
             byte[] buffer = dPackage.getData();
-                String text = new String(buffer);
-                System.out.println("Received Data: " + text);
-            
-            reciveDs.close();                
+                String text = new String(buffer,"UTF8");
+                System.out.println("Received Data: " + text);           
                 
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
