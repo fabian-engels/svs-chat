@@ -18,7 +18,7 @@ public class Client {
     
     public static void main( String[] args ) throws SocketException, UnknownHostException{
         
-        int port = 9600;
+        int port = 7070;
         int recivePort = 9602;
         InetAddress ia = InetAddress.getByName("localhost");
         
@@ -31,15 +31,17 @@ public class Client {
         
         System.out.println("Sendet data length: " + data.length);
         
-        DatagramPacket dm = new DatagramPacket(data, data.length, ia, port);
+        DatagramPacket dPackage = new DatagramPacket(data, data.length, ia, port);
                
         try {
-            ds.send(dm);
+            dPackage.setPort(9600);
+            ds.send(dPackage);
             ds.close();
             
-            reciveDs.receive(dm);
+            dPackage.setPort(9602);
+            reciveDs.receive(dPackage);
                        
-            byte[] buffer = dm.getData();
+            byte[] buffer = dPackage.getData();
                 String text = new String(buffer);
                 System.out.println("Received Data: " + text);
             
