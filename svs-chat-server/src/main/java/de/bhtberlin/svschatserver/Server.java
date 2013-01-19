@@ -5,9 +5,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.nio.Buffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Hello world!
@@ -21,7 +18,6 @@ public class Server
         DatagramSocket serverSocket;
         DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
         try{
-            sendSocket = new DatagramSocket(9602);
             serverSocket = new DatagramSocket(9600);
             while(true){
                 serverSocket.receive(packet);
@@ -32,7 +28,10 @@ public class Server
                 InetAddress address = packet.getAddress();
                 packet.setAddress(address);
                 packet.setPort(packet.getPort()+2);
+                
+                sendSocket = new DatagramSocket(9602);
                 sendSocket.send(packet);
+                sendSocket.close();
                 System.out.println("Packet got send!");
             }
         }catch(SocketException ex){
