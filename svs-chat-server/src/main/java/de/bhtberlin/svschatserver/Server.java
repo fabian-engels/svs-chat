@@ -29,7 +29,7 @@ public class Server
                 packet.setAddress(address);
                 packet.setPort(9602);
                 
-                sendSocket = new DatagramSocket(9602);
+                sendSocket = new DatagramSocket(9601);
                 sendSocket.send(packet);
                 sendSocket.close();
                 System.out.println("Packet got send!");
