@@ -29,7 +29,6 @@ public class Server {
     final Integer sendToPort = 9602;
 
     public Server() {
-        this.packet = new DatagramPacket(new byte[1024], 1024);
         this.clients = new HashSet();
     }
 
@@ -43,15 +42,15 @@ public class Server {
             this.sendSocket.close();
         }
         while (true) {
-
             try {
+                this.packet = new DatagramPacket(new byte[1024], 1024); 
                 this.serverSocket.receive(this.packet);
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             InetAddress srcAddress = packet.getAddress();
-            System.out.println("Received from IP:" + srcAddress);
+            System.out.println("Received from IP:" + srcAddress+":"+packet.getPort());
             this.clients.add(srcAddress);
 
             execCommands(packet);
@@ -66,16 +65,14 @@ public class Server {
     private void responde(DatagramPacket packet) {
         packet.setPort(sendToPort);
         for (InetAddress iaddr : clients) {
-                packet.setAddress(iaddr);
+            packet.setAddress(iaddr);
             try {
                 this.sendSocket.send(packet);
+                System.out.println("Packet send to: "+packet.getAddress()+":"+packet.getPort());
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println("Packet got send!");
-        System.out.println(packet.getAddress());
-        System.out.println(packet.getPort());
     }
 
     private void execCommands(DatagramPacket packet) {
