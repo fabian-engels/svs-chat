@@ -14,8 +14,9 @@ import java.util.regex.Pattern;
 
 /**
  * SVS UDP Chat Server
- *
- * @author Fabian Engels, Sven Höche
+ * @version v0.01
+ * @author Fabian Engels
+ * @author Sven Höche
  *
  */
 public class Server {
