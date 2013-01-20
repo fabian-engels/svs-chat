@@ -11,20 +11,26 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * SVS UDP Client Chat v0.01 Sven Höche, Fabian Engels timeout, server
+ * SVS UDP Chat Client
+ *
+ * @version v0.01
+ * @author Sven Höche
+ * @author Fabian Engels
+ *
+ * Notes: - Timeout value for incoming messages has to be only limited for own
+ * messages.
  */
 public class Client {
 
     private Scanner in;
-//    private int port = -1;
     private int port = 0;
     private final int recivePort = 9602;
     private final int targetPort = 9600;
     private String inputLine = "";
-//    private byte[] data;
     private DatagramSocket dsocket;
     private InetAddress ia;
     private DatagramPacket dPackage;
+    private Thread receiverThread;
 
     public Client() {
         try {
@@ -46,27 +52,36 @@ public class Client {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        Thread receiverThread = new ReceiverThread(recivePort);
+        receiverThread = new ReceiverThread(recivePort);
         receiverThread.start();
 
         try {
-            while (!inputLine.equalsIgnoreCase("/close")) {
+            while (true) {
                 this.inputLine = in.nextLine();
-                StringBuilder sb = new StringBuilder();
-                sb.append(this.ia.getHostAddress());
-                sb.append(": ");
-                sb.append(this.inputLine);
-                byte[] data = sb.toString().getBytes();
+                
+                processInput(this.inputLine);
+                byte[] data = this.inputLine.getBytes();
 
                 this.dPackage = new DatagramPacket(data, data.length, ia, port);
 
                 this.dPackage.setPort(targetPort);
                 this.dsocket.send(dPackage);
             }
-            receiverThread.interrupt();
-            System.exit(0);
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void processInput(final String input) {
+        String[] args = input.split("\\W");
+
+        if (args[0].equalsIgnoreCase("/close")) {
+            this.receiverThread.interrupt();
+            this.dsocket.close();
+            System.exit(0);
+        }
+        if (args[0].equalsIgnoreCase("/port")) {
+            this.port = Integer.parseInt(args[1]);
         }
     }
 
@@ -100,9 +115,9 @@ public class Client {
 
         private DatagramSocket datagramSocket;
         private int port;
-        private int bufferSize = 256;
+        private final int bufferSize = 256;
 
-        public ReceiverThread(int port) {
+        public ReceiverThread(final int port) {
             this.port = port;
             System.out.println("Listen on port: " + port);
         }
@@ -130,15 +145,16 @@ public class Client {
                     dp = new DatagramPacket(buf, buf.length);
                     this.datagramSocket.receive(dp);
                     byte[] textBuf = dp.getData();
-
-                    /* Begin  debug output */
-                    for (byte b : textBuf) {
-                        System.out.print(b);
-                    }
-                    System.out.println();
-                    /* End of debug output */
+                    /* 
+                     * for (byte b : textBuf) { System.out.print(b); }
+                     * System.out.println();
+                     */
                     String text = new String(textBuf, "UTF8");
-                    System.out.println("Received Data: " + text);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(dp.getAddress().toString().substring(1));
+                    sb.append("> ");
+                    sb.append(text);
+                    System.out.println(sb);
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
