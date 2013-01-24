@@ -75,15 +75,17 @@ public class Client {
     }
 
     private void processInput(final String input) {
-        String[] args = input.split("\\W");
+        String[] args = input.split(" "); // Was: \\W
 
-        if (args[0].equalsIgnoreCase("/close")) {
-            this.receiverThread.interrupt();
-            this.dsocket.close();
-            System.exit(0);
+        if (args.length > 0 && args[0].equalsIgnoreCase("/close")) {
+           this.receiverThread.interrupt();
+           this.dsocket.close();
+           System.out.println("Program is shuting down.");
+           System.exit(0);
         }
-        if (args[0].equalsIgnoreCase("/port")) {
-            this.port = Integer.parseInt(args[1]);
+        if (args.length > 0 && args[0].equalsIgnoreCase("/port")) {
+           this.port = Integer.parseInt(args[1]);
+           System.out.println("New /port " + this.port + " set.");            
         }
     }
 
@@ -105,7 +107,7 @@ public class Client {
         String[] inPut = this.in.nextLine().split(" ");
         final String portRegEx = "/port";
 
-        if (inPut[0].contains(portRegEx) && inPut.length != 1 && inPut[1].matches("\\d+")) {
+        if (inPut[0].contains(portRegEx) && inPut.length > 0 && inPut[1].matches("\\d+")) {
             System.out.println(portRegEx + inPut[1] + " set.");
             this.port = Integer.parseInt(inPut[1]);
         } else {
