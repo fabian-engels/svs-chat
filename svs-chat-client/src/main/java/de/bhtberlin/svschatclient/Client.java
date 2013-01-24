@@ -19,6 +19,8 @@ import java.util.logging.Logger;
  *
  * Notes: - Timeout value for incoming messages has to be only limited for own
  * messages.
+ * 
+ * Errors: When send /port ... as message nothing will changed (its a message)
  */
 public class Client {
 
