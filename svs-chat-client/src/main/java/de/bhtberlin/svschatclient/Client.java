@@ -20,19 +20,19 @@ import java.util.logging.Logger;
  * Notes: - Timeout value for incoming messages has to be only limited for own
  * messages.
  * 
- * Errors: When send /port ... as message nothing will changed (its a message)
  */
 public class Client {
 
     private Scanner in;
-    private int port = 0;
+    private final int localPort = 0;
     private final int recivePort = 9602;
-    private final int targetPort = 9600;
+    private int targetPort = 9600;
     private String inputLine = "";
     private DatagramSocket dsocket;
     private InetAddress ia;
     private DatagramPacket dPackage;
     private Thread receiverThread;
+    private boolean wasProcessLine = false;
 
     public Client() {
         try {
@@ -45,11 +45,11 @@ public class Client {
 
     public void run() {
         displayUsage();
-        if (port == -1) {
+        if (targetPort == -1) {
             askForPort();
         }
         try {
-            this.dsocket = new DatagramSocket(port); //UDP
+            this.dsocket = new DatagramSocket(localPort); //UDP
         } catch (SocketException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -62,9 +62,15 @@ public class Client {
                 this.inputLine = in.nextLine();
                 
                 processInput(this.inputLine);
+                
+                if(wasProcessLine == true){
+                    wasProcessLine = false;
+                    continue;
+                }
+                
                 byte[] data = this.inputLine.getBytes();
 
-                this.dPackage = new DatagramPacket(data, data.length, ia, port);
+                this.dPackage = new DatagramPacket(data, data.length, ia, localPort);
 
                 this.dPackage.setPort(targetPort);
                 this.dsocket.send(dPackage);
@@ -80,12 +86,14 @@ public class Client {
         if (args.length > 0 && args[0].equalsIgnoreCase("/close")) {
            this.receiverThread.interrupt();
            this.dsocket.close();
+           wasProcessLine = true;
            System.out.println("Program is shuting down.");
            System.exit(0);
         }
         if (args.length > 0 && args[0].equalsIgnoreCase("/port")) {
-           this.port = Integer.parseInt(args[1]);
-           System.out.println("New /port " + this.port + " set.");            
+           this.targetPort = Integer.parseInt(args[1]);
+           System.out.println("New /port " + this.targetPort + " set.");
+           wasProcessLine = true;
         }
     }
 
@@ -109,7 +117,7 @@ public class Client {
 
         if (inPut[0].contains(portRegEx) && inPut.length > 0 && inPut[1].matches("\\d+")) {
             System.out.println(portRegEx + inPut[1] + " set.");
-            this.port = Integer.parseInt(inPut[1]);
+            this.targetPort = Integer.parseInt(inPut[1]);
         } else {
             askForPort();
         }
