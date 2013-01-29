@@ -49,7 +49,13 @@ public class Client {
     public void run() {
         displayUsage();
         
-        if (serverIP.isEmpty()){
+        if (!serverIP.isEmpty()){
+            try {
+                this.ia = InetAddress.getByName(serverIP);
+            } catch (UnknownHostException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else{
             askForServerIP();
         }
         if (targetPort == -1) {
