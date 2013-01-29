@@ -44,11 +44,6 @@ public class Client {
 
     public Client() {
         this.in = new Scanner(System.in);
-    }
-
-    public void run() {
-        displayUsage();
-        
         if (!serverIP.isEmpty()){
             try {
                 this.ia = InetAddress.getByName(serverIP);
@@ -58,6 +53,11 @@ public class Client {
         }else{
             askForServerIP();
         }
+    }
+
+    public void run() {
+        displayUsage();
+
         if (targetPort == -1) {
             askForPort();
         }
@@ -75,8 +75,9 @@ public class Client {
 
         try {
             while (true) {
-                this.inputLine = in.nextLine();
                 System.out.print(clientName + ": ");
+                System.out.flush();
+                this.inputLine = in.nextLine();
                 processInput(this.inputLine);
                 
                 this.inputLine = nameRegEx + " " + clientName + ":" + this.inputLine;
@@ -222,6 +223,8 @@ public class Client {
                     sb.append("> ");
                     sb.append(text);
                     System.out.println(sb);
+                    System.out.print(clientName + ": ");
+                    System.out.flush();
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
