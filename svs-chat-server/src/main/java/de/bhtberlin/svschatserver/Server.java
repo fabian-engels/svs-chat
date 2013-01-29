@@ -97,11 +97,14 @@ public class Server {
                 continue;
             } else {
                 packet.setAddress(iaddr);
-                byte[] data = packet.getData();
-                packet.setData(splitText(packet, ":")[1].getBytes());
+                String[]arr = splitText(packet, "/name");
+                if(arr.length >= 2) {
+                    packet.setData(splitText(packet, "/name")[1].getBytes());
+                }
             }
             try {
                 this.sendSocket.send(packet);
+                System.out.println("Packet send   : " + new String(packet.getData()));
                 System.out.println("Packet send to: " + packet.getAddress() + ":" + packet.getPort());
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
