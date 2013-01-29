@@ -223,9 +223,9 @@ public class Client {
                     sb.append(dp.getAddress().toString().substring(1));
                     sb.append("> ");
                     sb.append(text);
+                    System.out.println();
                     System.out.println(sb);
                     System.out.print(clientName + ": ");
-                    System.out.flush();
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
