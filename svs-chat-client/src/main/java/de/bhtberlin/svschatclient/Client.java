@@ -24,31 +24,34 @@ import java.util.logging.Logger;
  */
 public class Client {
 
-    private Scanner in;
     private final int localPort = 0;
     private final int recivePort = 9602;
     private int targetPort = 9600;
+    private String clientName = "";
+    private String serverIP = "37.5.33.49";
+    
+    private Scanner in;
     private String inputLine = "";
     private DatagramSocket dsocket;
     private InetAddress ia;
     private DatagramPacket dPackage;
     private Thread receiverThread;
     private boolean wasProcessLine = false;
-    private String clientName = "";
+    
     private final String portRegEx = "/port";
     private final String nameRegEx = "/name";
+    private final String serverIPRegEx = "/ip";
 
     public Client() {
-        try {
-            this.ia = InetAddress.getByName("37.5.33.49");
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        }
         this.in = new Scanner(System.in);
     }
 
     public void run() {
         displayUsage();
+        
+        if (serverIP.isEmpty()){
+            askForServerIP();
+        }
         if (targetPort == -1) {
             askForPort();
         }
@@ -66,8 +69,8 @@ public class Client {
 
         try {
             while (true) {
-                System.out.print(clientName + ": ");
                 this.inputLine = in.nextLine();
+                System.out.print(clientName + ": ");
                 processInput(this.inputLine);
                 
                 this.inputLine = nameRegEx + " " + clientName + ":" + this.inputLine;
@@ -102,6 +105,11 @@ public class Client {
         if (args.length > 0 && args[0].equalsIgnoreCase("/port")) {
            this.targetPort = Integer.parseInt(args[1]);
            System.out.println("New target /port " + this.targetPort + " set.");
+           wasProcessLine = true;
+        }
+        if (args.length > 0 && args[0].equalsIgnoreCase("/ip")) {
+           this.serverIP = args[1];
+           System.out.println("New server /ip " + this.serverIP + " set.");
            wasProcessLine = true;
         }
     }
@@ -143,6 +151,24 @@ public class Client {
             }
         }else{
             askForClientName();
+        }
+    }
+
+    private void askForServerIP() {
+        System.out.println("Please choose a Server-IP! (/ip ...)");
+        
+        String[] inPut = this.in.nextLine().split(" ");
+        
+        if (inPut[0].contains(serverIPRegEx) && inPut.length > 1 && inPut[1].matches("\\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b")) {
+            System.out.println(serverIPRegEx + " " + inPut[1] + " set.");
+            try {
+                this.serverIP = inPut[1];
+                this.ia = InetAddress.getByName(this.serverIP);
+            } catch (UnknownHostException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else{
+            askForServerIP();
         }
     }
 
