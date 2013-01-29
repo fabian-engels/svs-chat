@@ -19,6 +19,7 @@ import java.util.logging.Logger;
  *
  * Notes: - Timeout value for incoming messages has to be only limited for own
  * messages.
+ * Name, Name
  * 
  */
 public class Client {
@@ -33,10 +34,13 @@ public class Client {
     private DatagramPacket dPackage;
     private Thread receiverThread;
     private boolean wasProcessLine = false;
+    private String clientName = "";
+    private final String portRegEx = "/port";
+    private final String nameRegEx = "/name";
 
     public Client() {
         try {
-            this.ia = InetAddress.getByName("127.0.0.1");
+            this.ia = InetAddress.getByName("37.5.33.49");
         } catch (UnknownHostException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -47,6 +51,9 @@ public class Client {
         displayUsage();
         if (targetPort == -1) {
             askForPort();
+        }
+        if(clientName.isEmpty()){
+            askForClientName();
         }
         try {
             this.dsocket = new DatagramSocket(localPort); //UDP
@@ -59,9 +66,11 @@ public class Client {
 
         try {
             while (true) {
+                System.out.print(clientName + ": ");
                 this.inputLine = in.nextLine();
-                
                 processInput(this.inputLine);
+                
+                this.inputLine = nameRegEx + " " + clientName + ":" + this.inputLine;
                 
                 if(wasProcessLine == true){
                     wasProcessLine = false;
@@ -92,7 +101,7 @@ public class Client {
         }
         if (args.length > 0 && args[0].equalsIgnoreCase("/port")) {
            this.targetPort = Integer.parseInt(args[1]);
-           System.out.println("New /port " + this.targetPort + " set.");
+           System.out.println("New target /port " + this.targetPort + " set.");
            wasProcessLine = true;
         }
     }
@@ -113,13 +122,27 @@ public class Client {
         System.out.println("Please choose a server port! (/port ...)");
 
         String[] inPut = this.in.nextLine().split(" ");
-        final String portRegEx = "/port";
 
-        if (inPut[0].contains(portRegEx) && inPut.length > 0 && inPut[1].matches("\\d+")) {
-            System.out.println(portRegEx + inPut[1] + " set.");
+        if (inPut[0].contains(portRegEx) && inPut.length > 1 && inPut[1].matches("\\d+")) {
+            System.out.println(portRegEx + " " + inPut[1] + " set.");
             this.targetPort = Integer.parseInt(inPut[1]);
         } else {
             askForPort();
+        }
+    }
+
+    private void askForClientName() {
+        System.out.println("Please choose a Name! (/name ...)");
+        
+        String[] inPut = this.in.nextLine().split(" ");
+        
+        if (inPut[0].contains(nameRegEx) && inPut.length > 1 && inPut[1].matches("\\w+")) {
+            System.out.println(nameRegEx + " " + inPut[1] + " set.");
+            for(int i = 1; i<inPut.length; i++){
+                this.clientName = clientName + inPut[i] + " ";
+            }
+        }else{
+            askForClientName();
         }
     }
 
