@@ -72,8 +72,9 @@ public class Client {
         try {
             while (true) {
                 System.out.print(clientName + ": ");
-                System.out.flush();
                 this.inputLine = in.nextLine();
+                System.out.flush();
+                System.out.println();
                 processInput(this.inputLine);
                 
                 this.inputLine = nameRegEx + " " + clientName + ":" + this.inputLine;
@@ -114,6 +115,11 @@ public class Client {
            this.serverIP = args[1];
            setNewServerIP(this.serverIP);
            System.out.println("New server /ip " + this.serverIP + " set.");
+           wasProcessLine = true;
+        }
+        if (args.length > 0 && args[0].equalsIgnoreCase("/name")) {
+           this.clientName = args[1];
+           System.out.println("New client /name " + this.clientName + " set.");
            wasProcessLine = true;
         }
     }
