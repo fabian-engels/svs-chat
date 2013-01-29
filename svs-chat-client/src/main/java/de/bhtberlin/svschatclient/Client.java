@@ -45,11 +45,7 @@ public class Client {
     public Client() {
         this.in = new Scanner(System.in);
         if (!serverIP.isEmpty()){
-            try {
-                this.ia = InetAddress.getByName(serverIP);
-            } catch (UnknownHostException ex) {
-                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            setNewServerIP(this.serverIP);
         }else{
             askForServerIP();
         }
@@ -116,9 +112,18 @@ public class Client {
         }
         if (args.length > 0 && args[0].equalsIgnoreCase("/ip")) {
            this.serverIP = args[1];
+           setNewServerIP(this.serverIP);
            System.out.println("New server /ip " + this.serverIP + " set.");
            wasProcessLine = true;
         }
+    }
+    
+    public void setNewServerIP(String ip){
+      try {
+            this.ia = InetAddress.getByName(ip);
+      } catch (UnknownHostException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }
 
     public static void main(String[] args) {
@@ -168,12 +173,8 @@ public class Client {
         
         if (inPut[0].contains(serverIPRegEx) && inPut.length > 1 && inPut[1].matches("\\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b")) {
             System.out.println(serverIPRegEx + " " + inPut[1] + " set.");
-            try {
-                this.serverIP = inPut[1];
-                this.ia = InetAddress.getByName(this.serverIP);
-            } catch (UnknownHostException ex) {
-                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            this.serverIP = inPut[1];
+            setNewServerIP(this.serverIP);
         }else{
             askForServerIP();
         }
