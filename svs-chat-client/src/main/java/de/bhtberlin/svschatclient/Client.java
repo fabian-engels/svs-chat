@@ -72,9 +72,11 @@ public class Client {
         try {
             while (true) {
                 System.out.print(clientName + ": ");
-                this.inputLine = in.nextLine();
-                System.out.flush();
-                System.out.println();
+                if(!in.hasNextLine()){
+                    System.out.println();
+                }else{
+                    this.inputLine = in.nextLine();
+                }
                 processInput(this.inputLine);
                 
                 this.inputLine = nameRegEx + " " + clientName + ":" + this.inputLine;
