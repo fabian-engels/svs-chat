@@ -80,6 +80,7 @@ public class Client {
                 }else{
                     this.inputLine = in.nextLine();
                 }
+                
                 processInput(this.inputLine);
                 
                 this.inputLine = nameRegEx + " " + clientName + ":" + this.inputLine;
@@ -101,45 +102,46 @@ public class Client {
         }
     }
 
+    //Dringend umbauen !!! Die methoden unten verwenden Exceptionhandling
     private void processInput(final String input) {
         String[] args = input.split(" "); // Was: \\W
-
-        if (args.length > 1 && args[0].equalsIgnoreCase("/close")) {
-           this.receiverThread.interrupt();
-           this.dsocket.close();
-           wasProcessLine = true;
-           System.out.println("Program is shuting down.");
-           System.exit(0);
-        }
-        if (args.length > 1 && args[0].equalsIgnoreCase("/port")) {
-           this.targetPort = Integer.parseInt(args[1]);
-           System.out.println("New target /port " + this.targetPort + " set.");
-           wasProcessLine = true;
-        }
-        if (args.length > 1 && args[0].equalsIgnoreCase("/ip")) {
-           this.serverIP = args[1];
-           setNewServerIP(this.serverIP);
-           System.out.println("New server /ip " + this.serverIP + " set.");
-           wasProcessLine = true;
-        }
-        if (args.length > 1 && args[0].equalsIgnoreCase("/name")) {
-           this.clientName = args[1];
-           System.out.println("New client /name " + this.clientName + " set.");
-           wasProcessLine = true;
-        }
         
-        //Is Transmitting this to server
-        if (args.length > 1 && args[0].equalsIgnoreCase("/file")) {
-            String[] sa1 = args[1].split(":");
-            int i1 = args[1].indexOf(":");
-            
-            if(sa1.length > 0){
-               this.fileReciver = sa1[0];
-               this.filePath = args[1].substring(i1+1, args[1].length());
+        if (args.length > 1) {
+            if (args[0].equalsIgnoreCase("/close")) {
+                this.receiverThread.interrupt();
+                this.dsocket.close();
+                wasProcessLine = true;
+                System.out.println("Program is shuting down.");
+                System.exit(0);
             }
-           System.out.println("Transmiting /file " + this.filePath + " to " + fileReciver + ".");
+            if (args[0].equalsIgnoreCase("/port")) {
+                this.targetPort = Integer.parseInt(args[1]);
+                System.out.println("New target /port " + this.targetPort + " set.");
+                wasProcessLine = true;
+            }
+            if (args[0].equalsIgnoreCase("/ip")) {
+                this.serverIP = args[1];
+                setNewServerIP(this.serverIP);
+                System.out.println("New server /ip " + this.serverIP + " set.");
+                wasProcessLine = true;
+            }
+            if (args[0].equalsIgnoreCase("/name")) {
+                this.clientName = args[1];
+                System.out.println("New client /name " + this.clientName + " set.");
+                wasProcessLine = true;
+            }
+            //Is Transmitting this to server
+            if (args[0].equalsIgnoreCase("/file")) {
+                String[] sa1 = args[1].split(":");
+                int i1 = args[1].indexOf(":");
+
+                if (sa1.length > 0) {
+                    this.fileReciver = sa1[0];
+                    this.filePath = args[1].substring(i1 + 1, args[1].length());
+                }
+                System.out.println("Transmiting /file " + this.filePath + " to " + fileReciver + ".");
+            }
         }
-        System.out.println("Wrong command.");
     }
     
     public void setNewServerIP(String ip){
