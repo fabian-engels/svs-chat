@@ -112,9 +112,10 @@ public class Server {
                     try {
                         DatagramPacket dp = new DatagramPacket(packet.getData(), packet.getData().length);
                         dp.setAddress(iaddr);
+                        dp.setPort(this.sendToPort);
                         this.sendSocket.send(dp);
-                        System.out.println("Packet send   : " + new String(packet.getData()));
-                        System.out.println("Packet send to: " + packet.getAddress() + ":" + packet.getPort());
+                        System.out.println("Packet send   : " + new String(dp.getData()));
+                        System.out.println("Packet send to: " + packet.getAddress() + ":" + dp.getPort());
                         System.out.println("Packet send at: " + GregorianCalendar.getInstance().getTime().toString());
                     } catch (IOException ex) {
                         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
