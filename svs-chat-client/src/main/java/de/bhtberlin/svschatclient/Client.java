@@ -251,11 +251,8 @@ public class Client {
                     dp = new DatagramPacket(buf, buf.length);
                     this.datagramSocket.receive(dp);
                     byte[] textBuf = dp.getData();
-                    /* 
-                     * for (byte b : textBuf) { System.out.print(b); }
-                     * System.out.println();
-                     */
-                    String text = new String(textBuf); //UTF8
+
+                    String text = new String(textBuf, "UTF8");
                     StringBuilder sb = new StringBuilder();
                     sb.append(dp.getAddress().toString().substring(1));
                     sb.append("> ");
