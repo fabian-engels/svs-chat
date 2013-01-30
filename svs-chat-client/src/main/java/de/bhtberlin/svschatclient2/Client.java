@@ -81,6 +81,7 @@ public class Client {
                 String receiverName = st.nextToken();
                 String path = st.nextToken();
                 startFileThread(receiverName, path);
+                
             } else {
                 System.out.print(this.name + ": ");
                 sendMessage(input);
@@ -105,7 +106,7 @@ public class Client {
         this.commands.put(CM.QUIT, new Command("/quit", "Type /quit to exit the chant and termnate the program."));
         this.commands.put(CM.FILE, new Command("/file", "Type /file <targetname> <file path> to send a file."));
         startSendThread();
-        startReceiveThread();
+       // startReceiveThread();
     }
 
     private void startReceiveThread() {
@@ -125,12 +126,12 @@ public class Client {
             initSendSocket();
             initMessageSender();
             this.sendThread = new Thread(this.messageSender);
-            this.sendThread.start();
         } catch (SocketException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnknownHostException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
+            this.sendThread.start();
     }
 
     private void initSendSocket() throws UnknownHostException, SocketException {
@@ -155,12 +156,13 @@ public class Client {
             final File file = new File(path);
             initFileSender(receiverName, file);
             this.sendFileThread = new Thread(this.fileSender);
-            this.sendThread.start();
+            System.out.print(this.sendFileThread.getState());
         } catch (SocketException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnknownHostException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
+        this.sendFileThread.start();
     }
 
     private void initSendFileSocket() throws SocketException {

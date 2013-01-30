@@ -35,7 +35,7 @@ class FileSender implements Runnable {
         this.serverAddress = serverAddress;
         this.receiverName = receiverName;
     }
-
+    
     @Override
     public void run() {
         try {
