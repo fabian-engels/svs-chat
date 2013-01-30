@@ -21,17 +21,21 @@ import java.util.logging.Logger;
         
         @Override
         public void run(){
+            Logger.getLogger(MessageReceiver.class.getName()).log(Level.INFO, new String("running..."));
+            
             byte[] buf = new byte[this.bufferSize];
             DatagramPacket dp = new DatagramPacket(buf, bufferSize);
             /**
              * @TODO fix IllegalStateException
              */
-            while(!Thread.currentThread().isInterrupted()){
+            while(!Thread.currentThread().isInterrupted()) {
+                Logger.getLogger(MessageReceiver.class.getName()).log(Level.INFO, new String("receiving..."));
                     try {
                         receiveSocket.receive(dp);
                     } catch (IOException ex) {
                         Logger.getLogger(MessageReceiver.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                    Logger.getLogger(MessageReceiver.class.getName()).log(Level.INFO, null, new String(dp.getData()));
                     System.out.println(new String(dp.getData()));
             }
         }

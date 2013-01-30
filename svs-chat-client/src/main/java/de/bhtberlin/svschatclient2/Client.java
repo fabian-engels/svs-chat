@@ -69,7 +69,6 @@ public class Client {
         StringTokenizer st = new StringTokenizer(input);
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
-
             if (token.matches(commands.get(CM.NAME).getValue())) {
                 this.name = st.nextToken();
             } else if (token.matches(commands.get(CM.IP).getValue())) {
@@ -81,11 +80,10 @@ public class Client {
                 String receiverName = st.nextToken();
                 String path = st.nextToken();
                 startFileThread(receiverName, path);
-                
             } else {
-                System.out.print(this.name + ": ");
                 sendMessage(input);
             }
+            System.out.print(this.name + ": ");
         }
     }
 
