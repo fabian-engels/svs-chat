@@ -1,14 +1,23 @@
 package de.bhtberlin.svschatclient;
 
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * SVS UDP Chat Client
@@ -234,6 +243,8 @@ public class Client {
             }
             byte[] buf;
             DatagramPacket dp;
+            Pattern closePat = Pattern.compile("filetrans@.+");
+            
             try {
                 while (true) {
                     buf = new byte[bufferSize];
@@ -249,6 +260,24 @@ public class Client {
                     sb.append(dp.getAddress().toString().substring(1));
                     sb.append("> ");
                     sb.append(text);
+                    
+                    if (closePat.matcher(text).matches()) {
+                        int filePort = Integer.parseInt(text.split("@")[1]);
+                        
+                        Path path = Paths.get(filePath);
+                        byte[] data = Files.readAllBytes(path);
+                        int fixedData = data.length / 1024;
+                        
+                        if(data.length % 1024 != 0){
+                            fixedData++;
+                        }
+                        
+                        for(int i=0; i<fixedData; i+=1024){
+                            byte[] copy = Arrays.copyOfRange(data, i, i+1024);
+                            DatagramPacket dgp = new DatagramPacket(copy, copy.length, dp.getAddress(), filePort);
+                            datagramSocket.send(dgp);
+                        }
+                    }
                     
                     System.out.println(sb);
                     System.out.print(clientName + " : ");
