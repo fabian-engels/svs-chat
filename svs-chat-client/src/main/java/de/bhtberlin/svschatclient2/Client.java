@@ -81,7 +81,7 @@ public class Client {
                 String path = st.nextToken();
                 startFileThread(receiverName, path);
             } else {
-                sendMessage("/"+this.name +" "+ input);
+                sendMessage("/"+this.name +":"+ input);
             }
             System.out.print(this.name + ": ");
         }
