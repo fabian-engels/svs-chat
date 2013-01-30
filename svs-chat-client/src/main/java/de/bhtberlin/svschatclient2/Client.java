@@ -11,6 +11,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -60,15 +62,22 @@ public class Client {
         while (scanner.hasNext()) {
             input = scanner.next();
             System.out.println(input);
-            handleConsoleInput(input);
+            try {
+                handleConsoleInput(input);
+            } catch (NoSuchElementException ex) {
+                System.out.print("Wrong command syntax! (/command value)");
+            }
         }
         scanner.close();
     }
 
-    private void handleConsoleInput(final String input) {
+    private void handleConsoleInput(final String input) throws NoSuchElementException{
         StringTokenizer st = new StringTokenizer(input);
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
+            if (token.matches(commands.get(CM.HELP).getValue())) {
+                showUsage();
+            }
             if (token.matches(commands.get(CM.NAME).getValue())) {
                 this.name = st.nextToken();
             } else if (token.matches(commands.get(CM.IP).getValue())) {
@@ -99,10 +108,13 @@ public class Client {
         this.serverAddress = "37.5.33.49";
         this.targetServerPort = 9600;
         this.receivePort = 9602;
+        
+        this.commands.put(CM.HELP, new Command("/help", "Type /help for command list."));
         this.commands.put(CM.NAME, new Command("/name", "Type /name <new username> to change your name."));
         this.commands.put(CM.IP, new Command("/ip", "Type /ip <new ipaddress> to change the targeted chat server."));
         this.commands.put(CM.QUIT, new Command("/quit", "Type /quit to exit the chant and termnate the program."));
         this.commands.put(CM.FILE, new Command("/file", "Type /file <targetname> <file path> to send a file."));
+        
         startSendThread();
         startReceiveThread();
     }
@@ -170,7 +182,14 @@ public class Client {
         this.fileSender = new FileSender(name, file, this.targetServerPort, InetAddress.getByName(this.serverAddress), this.sendSocket);
     }
 
+    private void showUsage() {
+        for (Entry<Enum, Command> entry : commands.entrySet()) {
+            Command value = entry.getValue();
+            System.out.println(value.getUsage());
+        }
+    }
+    
     private enum CM {
-        NAME, IP, QUIT, FILE
+        NAME, IP, QUIT, FILE, HELP
     }
 }
