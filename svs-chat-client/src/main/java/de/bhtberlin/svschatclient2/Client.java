@@ -76,9 +76,11 @@ public class Client {
     private MessageSender messageSender;
     private DatagramSocket sendSocket;
 
-    private void sendMessage(final String message) {
-        this.messageQueue.add(message);
-        this.messageQueue.notifyAll();
+    private  void sendMessage(final String message) {
+        synchronized(this.messageQueue){
+            this.messageQueue.add(message);
+            this.messageQueue.notifyAll();
+        }
     }
 
     public Client() {
@@ -111,7 +113,6 @@ public class Client {
     }
 
     private enum CM {
-
         NAME, IP, QUIT
-}
     }
+}

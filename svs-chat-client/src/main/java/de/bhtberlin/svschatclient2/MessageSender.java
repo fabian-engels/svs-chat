@@ -20,10 +20,10 @@ import java.util.logging.Logger;
  * @author nto
  */
  class MessageSender implements Runnable {
-        final Queue<String> messageQueue;
-        final DatagramSocket sendSocket;
-        final int targetServerPort;
-        final InetAddress serverAddress;
+        private final BlockingQueue<String> messageQueue;
+        private final DatagramSocket sendSocket;
+        private final int targetServerPort;
+        private final InetAddress serverAddress;
         
         public MessageSender(final int targetServerPort, final InetAddress serverAddress, final DatagramSocket socket,final BlockingQueue<String> queue){
             this.messageQueue = queue;
@@ -36,20 +36,21 @@ import java.util.logging.Logger;
         public void run(){
             DatagramPacket dp = null;
             
-            
             /**
              * @TODO fix IllegalStateException
              */
             while(true){
-                if(this.messageQueue.isEmpty()){
-                    try {
-                        this.messageQueue.wait();
-                    } catch (IllegalMonitorStateException ex) {
-                        Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
-                    }catch (InterruptedException ex){
-                        Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                synchronized (this.messageQueue) {
+                if (this.messageQueue.isEmpty()) {
+                        try {
+                            this.messageQueue.wait();
+                        } catch (IllegalMonitorStateException ex) {
+                            Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
                         }
+                    }
+                }
                 String message = messageQueue.poll();
                 if(message==null){
                     continue;
