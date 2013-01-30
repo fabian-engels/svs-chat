@@ -24,7 +24,7 @@ import java.util.logging.Logger;
         private final int targetServerPort;
         private final InetAddress serverAddress;
         
-        public MessageSender(final int targetServerPort, final InetAddress serverAddress, final DatagramSocket socket,final BlockingQueue<String> queue){
+        public MessageSender(final int targetServerPort, final InetAddress serverAddress, final DatagramSocket socket, final BlockingQueue<String> queue){
             this.messageQueue = queue;
             this.sendSocket = socket;
             this.targetServerPort = targetServerPort;

@@ -104,11 +104,11 @@ public class Client {
     }
 
     public Client() {
-        this.name = "sven";
-        this.serverAddress = "127.0.0.1";
+        this.name = "nto";
+        this.serverAddress = "85.178.207.95";
         this.targetServerPort = 9600;
         this.receivePort = 9602;
-        this.bufferSize = 1024;
+        this.bufferSize = 10;
         this.commands.put(CM.HELP, new Command("/help", "Type /help for command list."));
         this.commands.put(CM.NAME, new Command("/name", "Type /name <new username> to change your name."));
         this.commands.put(CM.IP, new Command("/ip", "Type /ip <new ipaddress> to change the targeted chat server."));
