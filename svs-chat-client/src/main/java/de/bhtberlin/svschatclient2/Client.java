@@ -31,6 +31,14 @@ public class Client {
     private String serverAddress;
     private Thread sendThread;
     private int targetServerPort;
+    private int receivePort;
+    private Thread receivThread;
+    final BlockingQueue<String> messageQueue = new ArrayBlockingQueue<String>(100);
+    private Map<Enum, Command> commands = new HashMap<Enum, Command>();
+    private MessageSender messageSender;
+    private DatagramSocket sendSocket;
+    private MessageReceiver messageReceiver;
+    private DatagramSocket receiveSocket;
 
     private void setName(String name) {
         this.name = name;
@@ -52,7 +60,6 @@ public class Client {
         }
         scanner.close();
     }
-    private Map<Enum, Command> commands = new HashMap<Enum, Command>();
 
     private void handleConsoleInput(final String input) {
         StringTokenizer st = new StringTokenizer(input);
@@ -72,12 +79,9 @@ public class Client {
             }
         }
     }
-    final BlockingQueue<String> messageQueue = new ArrayBlockingQueue<String>(100);
-    private MessageSender messageSender;
-    private DatagramSocket sendSocket;
 
-    private  void sendMessage(final String message) {
-        synchronized(this.messageQueue){
+    private void sendMessage(final String message) {
+        synchronized (this.messageQueue) {
             this.messageQueue.add(message);
             this.messageQueue.notifyAll();
         }
@@ -87,10 +91,26 @@ public class Client {
         this.name = "unknown";
         this.serverAddress = "127.0.0.1";
         this.targetServerPort = 9600;
+        this.receivePort = 9602;
         this.commands.put(CM.NAME, new Command("/name", "Type /name <new username> to change your name."));
         this.commands.put(CM.IP, new Command("/ip", "Type /ip <new ipaddress> to change the targeted chat server."));
         this.commands.put(CM.QUIT, new Command("/quit", "Type /quit to exit the chant and termnate the program."));
-        
+        startSendThread();
+        startReceiveThread();
+    }
+
+    private void startReceiveThread() {
+        try {
+            initReceiveSocket();
+        } catch (SocketException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        initMessageReceiver();
+        this.receivThread = new Thread(this.messageReceiver);
+        this.receivThread.start();
+    }
+
+    private void startSendThread() {
         try {
             initSendSocket();
             initMessageSender();
@@ -98,18 +118,25 @@ public class Client {
             this.sendThread.start();
         } catch (SocketException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        }catch (UnknownHostException ex){
+        } catch (UnknownHostException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
-    
+
     private void initSendSocket() throws UnknownHostException, SocketException {
-            this.sendSocket = new DatagramSocket(0, InetAddress.getLocalHost());
+        this.sendSocket = new DatagramSocket(0);
     }
 
     private void initMessageSender() throws UnknownHostException {
         this.messageSender = new MessageSender(this.targetServerPort, InetAddress.getByName(this.serverAddress), this.sendSocket, this.messageQueue);
+    }
+
+    private void initReceiveSocket() throws SocketException {
+        this.receiveSocket = new DatagramSocket(this.receivePort);
+    }
+
+    private void initMessageReceiver() {
+        this.messageReceiver = new MessageReceiver(this.targetServerPort, this.sendSocket);
     }
 
     private enum CM {

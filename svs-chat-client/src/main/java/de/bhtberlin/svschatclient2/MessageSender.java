@@ -39,7 +39,7 @@ import java.util.logging.Logger;
             /**
              * @TODO fix IllegalStateException
              */
-            while(true){
+            while(!Thread.currentThread().isInterrupted()){
                 synchronized (this.messageQueue) {
                 if (this.messageQueue.isEmpty()) {
                         try {
