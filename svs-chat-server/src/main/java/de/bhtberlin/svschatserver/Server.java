@@ -109,10 +109,10 @@ public class Server {
 
         /*  */
         for (InetAddress iaddr : clients.keySet()) {
-            Set<String> tmpSet = clients.get(iaddr);
-                    packet.setAddress(iaddr);
                     try {
-                        this.sendSocket.send(packet);
+                        DatagramPacket dp = new DatagramPacket(packet.getData(), packet.getData().length);
+                        dp.setAddress(iaddr);
+                        this.sendSocket.send(dp);
                         System.out.println("Packet send   : " + new String(packet.getData()));
                         System.out.println("Packet send to: " + packet.getAddress() + ":" + packet.getPort());
                         System.out.println("Packet send at: " + GregorianCalendar.getInstance().getTime().toString());
