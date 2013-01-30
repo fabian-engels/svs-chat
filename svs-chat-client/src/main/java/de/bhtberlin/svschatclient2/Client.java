@@ -4,6 +4,7 @@
  */
 package de.bhtberlin.svschatclient2;
 
+import java.io.File;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -33,6 +34,7 @@ public class Client {
     private int targetServerPort;
     private int receivePort;
     private Thread receivThread;
+    private FileSender fileSender;
     final BlockingQueue<String> messageQueue = new ArrayBlockingQueue<String>(100);
     private Map<Enum, Command> commands = new HashMap<Enum, Command>();
     private MessageSender messageSender;
@@ -73,13 +75,17 @@ public class Client {
             } else if (token.matches(commands.get(CM.QUIT).getValue())) {
                 this.sendThread.stop();
                 System.exit(0);
+            } else if (token.matches(commands.get(CM.FILE).getValue())) {
+                String receiverName = st.nextToken();
+                String path = st.nextToken();
+                startFileThread(receiverName, path);
             } else {
                 System.out.print(this.name + ": ");
                 sendMessage(input);
             }
         }
     }
-
+    
     private void sendMessage(final String message) {
         synchronized (this.messageQueue) {
             this.messageQueue.add(message);
@@ -88,8 +94,8 @@ public class Client {
     }
 
     public Client() {
-        this.name = "unknown";
-        this.serverAddress = "127.0.0.1";
+        this.name = "sven";
+        this.serverAddress = "37.5.33.49";
         this.targetServerPort = 9600;
         this.receivePort = 9602;
         this.commands.put(CM.NAME, new Command("/name", "Type /name <new username> to change your name."));
@@ -139,7 +145,12 @@ public class Client {
         this.messageReceiver = new MessageReceiver(this.targetServerPort, this.sendSocket);
     }
 
+    private void startFileThread(String receiverName, String path) {
+        File file = new File(path);
+        this.fileSender = new FileSender(receiverName, file, this.targetServerPort, InetAddress.getByName(this.serverAddress), this.sendSocket);
+    }
+
     private enum CM {
-        NAME, IP, QUIT
+        NAME, IP, QUIT, FILE
     }
 }
