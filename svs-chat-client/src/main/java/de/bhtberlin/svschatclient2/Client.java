@@ -149,18 +149,18 @@ public class Client {
         this.messageReceiver = new MessageReceiver(this.targetServerPort, this.sendSocket);
     }
 
-    private void startFileThread(String receiverName, String path) {
+    private void startFileThread(final String receiverName, final String path) {
         try {
             initSendFileSocket();
-            File file = new File(path);
+            final File file = new File(path);
             initFileSender(receiverName, file);
+            this.sendFileThread = new Thread(this.fileSender);
+            this.sendThread.start();
         } catch (SocketException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnknownHostException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
-        this.sendFileThread = new Thread(this.fileSender);
-        this.sendThread.start();
     }
 
     private void initSendFileSocket() throws SocketException {
@@ -172,7 +172,6 @@ public class Client {
     }
 
     private enum CM {
-
         NAME, IP, QUIT, FILE
     }
 }

@@ -11,9 +11,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.nio.charset.Charset;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,7 +28,7 @@ class FileSender implements Runnable {
     private final File file;
     private final String receiverName; //TODO implementieren
 
-    public FileSender(String receiverName, File file, final int targetServerPort, final InetAddress serverAddress, final DatagramSocket socket) {
+    public FileSender(final String receiverName, final File file, final int targetServerPort, final InetAddress serverAddress, final DatagramSocket socket) {
         this.file = file;
         this.sendSocket = socket;
         this.targetServerPort = targetServerPort;
@@ -50,8 +47,8 @@ class FileSender implements Runnable {
 
             while(fileInputStream.read(data) != -1){
                 dp = new DatagramPacket(data, 1024);
-                dp.setPort(targetServerPort);
-                dp.setAddress(serverAddress);
+                dp.setPort(this.targetServerPort);
+                dp.setAddress(this.serverAddress);
                 sendSocket.send(dp);
             }
         } catch (FileNotFoundException ex) {
