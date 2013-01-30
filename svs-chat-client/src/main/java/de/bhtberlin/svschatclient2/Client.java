@@ -52,7 +52,7 @@ public class Client {
         }
         scanner.close();
     }
-    private Map<Enum, Command> commands = new HashMap<>();
+    private Map<Enum, Command> commands = new HashMap<Enum, Command>();
 
     private void handleConsoleInput(final String input) {
         StringTokenizer st = new StringTokenizer(input);
@@ -72,7 +72,7 @@ public class Client {
             }
         }
     }
-    final BlockingQueue<String> messageQueue = new ArrayBlockingQueue<>(100);
+    final BlockingQueue<String> messageQueue = new ArrayBlockingQueue<String>(100);
     private MessageSender messageSender;
     private DatagramSocket sendSocket;
 
@@ -94,7 +94,9 @@ public class Client {
             initMessageSender();
             this.sendThread = new Thread(this.messageSender);
             this.sendThread.start();
-        } catch (SocketException | UnknownHostException ex) {
+        } catch (SocketException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }catch (UnknownHostException ex){
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
         

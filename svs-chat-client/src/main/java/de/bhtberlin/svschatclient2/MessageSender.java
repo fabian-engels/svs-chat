@@ -44,7 +44,9 @@ import java.util.logging.Logger;
                 if(this.messageQueue.isEmpty()){
                     try {
                         this.messageQueue.wait();
-                    } catch (IllegalMonitorStateException|InterruptedException ex) {
+                    } catch (IllegalMonitorStateException ex) {
+                        Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
+                    }catch (InterruptedException ex){
                         Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
                     }
                         }
