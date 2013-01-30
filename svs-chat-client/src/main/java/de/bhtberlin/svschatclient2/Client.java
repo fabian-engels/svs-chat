@@ -106,17 +106,17 @@ public class Client {
         this.commands.put(CM.QUIT, new Command("/quit", "Type /quit to exit the chant and termnate the program."));
         this.commands.put(CM.FILE, new Command("/file", "Type /file <targetname> <file path> to send a file."));
         startSendThread();
-       // startReceiveThread();
+        startReceiveThread();
     }
 
     private void startReceiveThread() {
         try {
             initReceiveSocket();
+            initMessageReceiver();
+            this.receivThread = new Thread(this.messageReceiver);
         } catch (SocketException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
-        initMessageReceiver();
-        this.receivThread = new Thread(this.messageReceiver);
         this.receivThread.start();
     }
 
@@ -156,7 +156,6 @@ public class Client {
             final File file = new File(path);
             initFileSender(receiverName, file);
             this.sendFileThread = new Thread(this.fileSender);
-            System.out.print(this.sendFileThread.getState());
         } catch (SocketException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnknownHostException ex) {
