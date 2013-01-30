@@ -38,7 +38,7 @@ public class Server {
     public Server() {
         this.clients = new HashMap<InetAddress, Set<String>>();
     }
-    
+
     public void run() {
         try {
             this.serverSocket = new DatagramSocket(this.receivePort);
@@ -58,7 +58,12 @@ public class Server {
 
             InetAddress srcAddress = packet.getAddress();
             System.out.println("Received from IP:" + srcAddress + ":" + packet.getPort());
-            String name = splitNameAndText(packet).trim();
+            String text = new String(packet.getData());
+            StringTokenizer st = new StringTokenizer(text, ":");
+            String name = st.nextToken();
+            if (name == null) {
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, "Error while parsing " + text);
+            }
 
             Set<String> tmpnames = clients.get(srcAddress);
             if (tmpnames == null) {
@@ -89,54 +94,51 @@ public class Server {
         new Server().run();
     }
 
-    private void sendResponse(DatagramPacket packet) {
-        Logger.getLogger(Server.class.getName()).log(Level.INFO, "responde() :: "+new String(packet.getData()));
-        
+    private void sendResponse(final DatagramPacket packet) {
+        Logger.getLogger(Server.class.getName()).log(Level.INFO, "responde() :: " + new String(packet.getData()));
+
         /*String name = splitNameAndText(packet);
-        if (name == null) {
-            return;
-        }*/
-        
-          StringTokenizer st = new StringTokenizer(new String(packet.getData()));
-          String name = st.nextToken(":");
-          String text = st.nextToken(":");
+         if (name == null) {
+         return;
+         }*/
+
+        StringTokenizer st = new StringTokenizer(new String(packet.getData()));
+        String name = st.nextToken(":");
+        String text = st.nextToken(":");
         packet.setPort(sendToPort);
-        
+
         /*  */
         for (InetAddress iaddr : clients.keySet()) {
-            if (clients.get(iaddr).contains(name)) {
-               // continue; // don't send to source client
-                packet.setAddress(iaddr);
-                //String[] arr = splitText(packet, "/name");
-                //if (arr.length >= 2) {
-                    packet.setData(packet.getData());
-                    //packet.setData(splitText(packet, "/name")[1].getBytes());//fuck ???
-                //}
+            Set<String> tmpSet = clients.get(iaddr);
+            for (String entry : tmpSet) {
+                if (entry.equals(name)) {
+                    packet.setAddress(iaddr);
+                    try {
+                        this.sendSocket.send(packet);
+                        System.out.println("Packet send   : " + new String(packet.getData()));
+                        System.out.println("Packet send to: " + packet.getAddress() + ":" + packet.getPort());
+                        System.out.println("Packet send at: " + GregorianCalendar.getInstance().getTime().toString());
+                    } catch (IOException ex) {
+                        Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
             }
-            
-            /* answer of server to clients */
-            try {
-                this.sendSocket.send(packet);
-                System.out.println("Packet send   : " + new String(packet.getData()));
-                System.out.println("Packet send to: " + packet.getAddress() + ":" + packet.getPort());
-                System.out.println("Packet send at: " + GregorianCalendar.getInstance().getTime().toString());
-            } catch (IOException ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            }
+
         }
     }
 
     private InetAddress getInetAddrByName(String name) {
         Set<String> tmpSet;
-        for (InetAddress iaddr :this.clients.keySet()) {
+        for (InetAddress iaddr : this.clients.keySet()) {
             tmpSet = this.clients.get(iaddr);
-            if(tmpSet.contains(name))
+            if (tmpSet.contains(name)) {
                 return iaddr;
             }
+        }
         return null;
     }
 
-    private void execCommands(DatagramPacket packet) {
+    private void execCommands(final DatagramPacket packet) {
         byte[] data = packet.getData();
         String text = null;
         try {
@@ -157,41 +159,41 @@ public class Server {
         if (unknownPat.matcher(text).matches()) {
             //@TODO notify new client
         }
-      /*  if (filePat.matcher(text).matches()) {
+        /*  if (filePat.matcher(text).matches()) {
 
-            String[] split = text.split("/file ");
-            if (split == null) {
-                // no file as argument
-            } else {
-                InetAddress destinationAddress = null;
-                String[] split1 = split[1].split(":");
-                destinationAddress = getInetAddrByName(split1[0]);
+         String[] split = text.split("/file ");
+         if (split == null) {
+         // no file as argument
+         } else {
+         InetAddress destinationAddress = null;
+         String[] split1 = split[1].split(":");
+         destinationAddress = getInetAddrByName(split1[0]);
 
                
-                DatagramSocket serverSocket = null;
-                try {
-                    serverSocket = new DatagramSocket();
-                } catch (SocketException ex) {
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                int fileTransferPort = serverSocket.getLocalPort();
+         DatagramSocket serverSocket = null;
+         try {
+         serverSocket = new DatagramSocket();
+         } catch (SocketException ex) {
+         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         int fileTransferPort = serverSocket.getLocalPort();
                 
-                if(destinationAddress==null){
-                    return;
-                }
+         if(destinationAddress==null){
+         return;
+         }
                 
-                Thread thread = new Thread(new FileTransferHandler(bufferSize, destinationAddress, serverSocket));
-                thread.start();
-                String fileMsg = "filetrans@" + fileTransferPort;
-                try {
-                   byte[] da00ta = fileMsg.getBytes();
-                    DatagramPacket dp = new DatagramPacket(da00ta, da00ta.length, packet.getAddress(), this.sendToPort);
-                    this.sendSocket.send(dp);
-                } catch (Exception ex) {
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                }
+         Thread thread = new Thread(new FileTransferHandler(bufferSize, destinationAddress, serverSocket));
+         thread.start();
+         String fileMsg = "filetrans@" + fileTransferPort;
+         try {
+         byte[] da00ta = fileMsg.getBytes();
+         DatagramPacket dp = new DatagramPacket(da00ta, da00ta.length, packet.getAddress(), this.sendToPort);
+         this.sendSocket.send(dp);
+         } catch (Exception ex) {
+         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+         }
 
-            }
-        }*/
+         }
+         }*/
     }
 }
