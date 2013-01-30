@@ -35,7 +35,7 @@ import java.util.logging.Logger;
                     } catch (IOException ex) {
                         Logger.getLogger(MessageReceiver.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    Logger.getLogger(MessageReceiver.class.getName()).log(Level.INFO, null, new String(dp.getData()));
+                    Logger.getLogger(MessageReceiver.class.getName()).log(Level.INFO, new String(dp.getData()));
                     System.out.println(new String(dp.getData()));
             }
         }
