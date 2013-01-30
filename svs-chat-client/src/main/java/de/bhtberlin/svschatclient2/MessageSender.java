@@ -9,7 +9,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,7 +38,7 @@ import java.util.logging.Logger;
             /**
              * @TODO fix IllegalStateException
              */
-            while(!Thread.currentThread().isInterrupted()){
+            while(!Thread.currentThread().isInterrupted()) {
                 synchronized (this.messageQueue) {
                 if (this.messageQueue.isEmpty()) {
                         try {
