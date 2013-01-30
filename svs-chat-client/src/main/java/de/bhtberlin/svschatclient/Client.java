@@ -255,31 +255,32 @@ public class Client {
                      * for (byte b : textBuf) { System.out.print(b); }
                      * System.out.println();
                      */
-                    String text = new String(textBuf, "UTF8");
+                    String text = new String(textBuf); //UTF8
                     StringBuilder sb = new StringBuilder();
                     sb.append(dp.getAddress().toString().substring(1));
                     sb.append("> ");
                     sb.append(text);
-                    
+                    System.out.println(sb);
+
                     if (closePat.matcher(text).matches()) {
-                        int filePort = Integer.parseInt(text.split("@")[1]);
-                        
+                        String[] sa = text.split("@");
+                        int filePort = Integer.parseInt(sa[1]);
+
                         Path path = Paths.get(filePath);
                         byte[] data = Files.readAllBytes(path);
                         int fixedData = data.length / 1024;
-                        
-                        if(data.length % 1024 != 0){
+
+                        if (data.length % 1024 != 0) {
                             fixedData++;
                         }
-                        
-                        for(int i=0; i<fixedData; i+=1024){
-                            byte[] copy = Arrays.copyOfRange(data, i, i+1024);
+
+                        for (int i = 0; i < fixedData; i += 1024) {
+                            byte[] copy = Arrays.copyOfRange(data, i, i + 1024);
                             DatagramPacket dgp = new DatagramPacket(copy, copy.length, dp.getAddress(), filePort);
                             datagramSocket.send(dgp);
                         }
                     }
-                    
-                    System.out.println(sb);
+
                     System.out.print(clientName + " : ");
                 }
             } catch (IOException ex) {
