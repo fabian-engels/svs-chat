@@ -1,11 +1,14 @@
 package de.bhtberlin.svschatserver;
 
+import com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.SocketException;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,6 +34,7 @@ public class Server {
     final Integer receivePort = 9600;
     final Integer sendFromPort = 9601;
     final Integer sendToPort = 9602;
+    final int bufferSize = 1024;
 
     public Server() {
         this.clients = new HashMap<InetAddress, Set<String>>();
@@ -47,7 +51,7 @@ public class Server {
         }
         while (true) {
             try {
-                this.packet = new DatagramPacket(new byte[1024], 1024);
+                this.packet = new DatagramPacket(new byte[bufferSize], bufferSize);
                 this.serverSocket.receive(this.packet);
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
@@ -55,7 +59,7 @@ public class Server {
 
             InetAddress srcAddress = packet.getAddress();
             System.out.println("Received from IP:" + srcAddress + ":" + packet.getPort());
-            String name = splitName(packet);
+            String name = splitName(packet).trim();
 
             Set<String> tmpnames = clients.get(srcAddress);
             if (tmpnames == null) {
@@ -79,7 +83,7 @@ public class Server {
         if (text == null || text.length < 2) {
             return "EmptyName";
         }
-        return text[0];
+        return text[0].replaceAll("/name", "");
     }
 
     public static void main(String[] args) {
@@ -97,8 +101,8 @@ public class Server {
                 continue;
             } else {
                 packet.setAddress(iaddr);
-                String[]arr = splitText(packet, "/name");
-                if(arr.length >= 2) {
+                String[] arr = splitText(packet, "/name");
+                if (arr.length >= 2) {
                     packet.setData(splitText(packet, "/name")[1].getBytes());
                 }
             }
@@ -106,10 +110,21 @@ public class Server {
                 this.sendSocket.send(packet);
                 System.out.println("Packet send   : " + new String(packet.getData()));
                 System.out.println("Packet send to: " + packet.getAddress() + ":" + packet.getPort());
+                System.out.println("Packet send at: " + GregorianCalendar.getInstance().getTime().toString());
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    private InetAddress getInetAddrByName(String name) {
+        Set<String> tmpSet;
+        for (InetAddress iaddr :this.clients.keySet()) {
+            tmpSet = this.clients.get(iaddr);
+            if(tmpSet.contains(name))
+                return iaddr;
+            }
+        return null;
     }
 
     private void execCommands(DatagramPacket packet) {
@@ -124,7 +139,7 @@ public class Server {
         }
 
         Pattern closePat = Pattern.compile("/close.+");
-        Pattern filePat = Pattern.compile("/file.+");
+        Pattern filePat = Pattern.compile(".+/file.+");
         Pattern unknownPat = Pattern.compile("unknown");
 
         if (closePat.matcher(text).matches()) {
@@ -134,11 +149,42 @@ public class Server {
             //@TODO notify new client
         }
         if (filePat.matcher(text).matches()) {
-            String[] split = text.split("/file");
+
+            String[] split = text.split("/file ");
             if (split == null) {
                 // no file as argument
             } else {
-                //new FileTransferHandler()
+                InetAddress destinationAddress = null;
+                String[] split1 = split[1].split(":");
+                destinationAddress = getInetAddrByName(split1[0]);
+
+                /**
+                 * @TODO parse text for destinationAddress and send serverSocket
+                 * back
+                 */
+                DatagramSocket serverSocket = null;
+                try {
+                    serverSocket = new DatagramSocket();
+                } catch (SocketException ex) {
+                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                int fileTransferPort = serverSocket.getLocalPort();
+                
+                if(destinationAddress==null){
+                    return;
+                }
+                
+                Thread thread = new Thread(new FileTransferHandler(bufferSize, destinationAddress, serverSocket));
+                thread.start();
+                String fileMsg = "filetrans@" + fileTransferPort;
+                try {
+                   byte[] da00ta = fileMsg.getBytes();
+                    DatagramPacket dp = new DatagramPacket(da00ta, da00ta.length, packet.getAddress(), this.sendToPort);
+                    this.sendSocket.send(dp);
+                } catch (Exception ex) {
+                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
             }
         }
     }

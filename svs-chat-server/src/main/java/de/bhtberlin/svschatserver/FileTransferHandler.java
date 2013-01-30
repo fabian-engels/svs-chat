@@ -27,7 +27,7 @@ public class FileTransferHandler implements Runnable {
         this.bufferSize = buffersize;
         this.destination = destination;
     }
-
+    
     public void run() {
         while(true) {
               try {
@@ -35,6 +35,10 @@ public class FileTransferHandler implements Runnable {
                 this.serverSocket.receive(this.packet);
                 this.packet.setAddress(destination);
                 this.serverSocket.send(packet);
+                if(this.packet.getLength()!=this.bufferSize){
+                    this.serverSocket.close();
+                    return;
+                }
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
