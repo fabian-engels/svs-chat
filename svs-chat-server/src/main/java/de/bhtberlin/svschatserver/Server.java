@@ -110,8 +110,6 @@ public class Server {
         /*  */
         for (InetAddress iaddr : clients.keySet()) {
             Set<String> tmpSet = clients.get(iaddr);
-            for (String entry : tmpSet) {
-                if (entry.equals(name)) {
                     packet.setAddress(iaddr);
                     try {
                         this.sendSocket.send(packet);
@@ -121,8 +119,6 @@ public class Server {
                     } catch (IOException ex) {
                         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }
-            }
 
         }
     }
