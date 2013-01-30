@@ -19,7 +19,8 @@ import java.util.logging.Logger;
  *
  * Notes: - Timeout value for incoming messages has to be only limited for own
  * messages.
- * Name, Name
+ * nachricht mit /file name "pfad"
+ * bekomme ein port auf anfrage
  * 
  */
 public class Client {
@@ -41,6 +42,8 @@ public class Client {
     private final String portRegEx = "/port";
     private final String nameRegEx = "/name";
     private final String serverIPRegEx = "/ip";
+    private String fileReciver = "";
+    private String filePath = "";
 
     public Client() {
         this.in = new Scanner(System.in);
@@ -101,29 +104,42 @@ public class Client {
     private void processInput(final String input) {
         String[] args = input.split(" "); // Was: \\W
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("/close")) {
+        if (args.length > 1 && args[0].equalsIgnoreCase("/close")) {
            this.receiverThread.interrupt();
            this.dsocket.close();
            wasProcessLine = true;
            System.out.println("Program is shuting down.");
            System.exit(0);
         }
-        if (args.length > 0 && args[0].equalsIgnoreCase("/port")) {
+        if (args.length > 1 && args[0].equalsIgnoreCase("/port")) {
            this.targetPort = Integer.parseInt(args[1]);
            System.out.println("New target /port " + this.targetPort + " set.");
            wasProcessLine = true;
         }
-        if (args.length > 0 && args[0].equalsIgnoreCase("/ip")) {
+        if (args.length > 1 && args[0].equalsIgnoreCase("/ip")) {
            this.serverIP = args[1];
            setNewServerIP(this.serverIP);
            System.out.println("New server /ip " + this.serverIP + " set.");
            wasProcessLine = true;
         }
-        if (args.length > 0 && args[0].equalsIgnoreCase("/name")) {
+        if (args.length > 1 && args[0].equalsIgnoreCase("/name")) {
            this.clientName = args[1];
            System.out.println("New client /name " + this.clientName + " set.");
            wasProcessLine = true;
         }
+        
+        //Is Transmitting this to server
+        if (args.length > 1 && args[0].equalsIgnoreCase("/file")) {
+            String[] sa1 = args[1].split(":");
+            int i1 = args[1].indexOf(":");
+            
+            if(sa1.length > 0){
+               this.fileReciver = sa1[0];
+               this.filePath = args[1].substring(i1+1, args[1].length());
+            }
+           System.out.println("Transmiting /file " + this.filePath + " to " + fileReciver + ".");
+        }
+        System.out.println("Wrong command.");
     }
     
     public void setNewServerIP(String ip){
@@ -145,7 +161,7 @@ public class Client {
                 + "*usage* to the change the targeted port type: /port <number>";
         System.out.println(text);
     }
-
+    
     public void askForPort() {
         System.out.println("Please choose a server port! (/port ...)");
 
@@ -231,9 +247,9 @@ public class Client {
                     sb.append(dp.getAddress().toString().substring(1));
                     sb.append("> ");
                     sb.append(text);
-                    System.out.println();
+                    
                     System.out.println(sb);
-                    System.out.print(clientName + ": ");
+                    System.out.print(clientName + " : ");
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
