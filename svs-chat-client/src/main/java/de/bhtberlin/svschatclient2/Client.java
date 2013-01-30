@@ -41,6 +41,8 @@ public class Client {
     private DatagramSocket sendSocket;
     private MessageReceiver messageReceiver;
     private DatagramSocket receiveSocket;
+    private Thread sendFileThread;
+    private DatagramSocket sendFileSocket;
 
     private void setName(String name) {
         this.name = name;
@@ -72,8 +74,8 @@ public class Client {
                 this.name = st.nextToken();
             } else if (token.matches(commands.get(CM.IP).getValue())) {
                 this.serverAddress = st.nextToken();
+                startSendThread();
             } else if (token.matches(commands.get(CM.QUIT).getValue())) {
-                this.sendThread.stop();
                 System.exit(0);
             } else if (token.matches(commands.get(CM.FILE).getValue())) {
                 String receiverName = st.nextToken();
@@ -85,7 +87,7 @@ public class Client {
             }
         }
     }
-    
+
     private void sendMessage(final String message) {
         synchronized (this.messageQueue) {
             this.messageQueue.add(message);
@@ -101,6 +103,7 @@ public class Client {
         this.commands.put(CM.NAME, new Command("/name", "Type /name <new username> to change your name."));
         this.commands.put(CM.IP, new Command("/ip", "Type /ip <new ipaddress> to change the targeted chat server."));
         this.commands.put(CM.QUIT, new Command("/quit", "Type /quit to exit the chant and termnate the program."));
+        this.commands.put(CM.FILE, new Command("/file", "Type /file <targetname> <file path> to send a file."));
         startSendThread();
         startReceiveThread();
     }
@@ -117,6 +120,7 @@ public class Client {
     }
 
     private void startSendThread() {
+        /* initialize sendThread the first time */
         try {
             initSendSocket();
             initMessageSender();
@@ -146,11 +150,29 @@ public class Client {
     }
 
     private void startFileThread(String receiverName, String path) {
-        File file = new File(path);
-        this.fileSender = new FileSender(receiverName, file, this.targetServerPort, InetAddress.getByName(this.serverAddress), this.sendSocket);
+        try {
+            initSendFileSocket();
+            File file = new File(path);
+            initFileSender(receiverName, file);
+        } catch (SocketException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        this.sendFileThread = new Thread(this.fileSender);
+        this.sendThread.start();
+    }
+
+    private void initSendFileSocket() throws SocketException {
+        this.sendFileSocket = new DatagramSocket(0);
+    }
+
+    private void initFileSender(String name, File file) throws UnknownHostException {
+        this.fileSender = new FileSender(name, file, this.targetServerPort, InetAddress.getByName(this.serverAddress), this.sendSocket);
     }
 
     private enum CM {
+
         NAME, IP, QUIT, FILE
     }
 }
