@@ -33,6 +33,7 @@ public class Client {
     private String name;
     private String serverAddress;
     private Thread sendThread;
+    private final int bufferSize;
     private int targetServerPort;
     private int receivePort;
     private Thread receivThread;
@@ -61,7 +62,6 @@ public class Client {
         System.out.print(this.name + ": ");
         while (scanner.hasNext()) {
             input = scanner.next();
-            System.out.println(input);
             try {
                 handleConsoleInput(input);
             } catch (NoSuchElementException ex) {
@@ -108,7 +108,7 @@ public class Client {
         this.serverAddress = "37.5.33.49";
         this.targetServerPort = 9600;
         this.receivePort = 9602;
-        
+        this.bufferSize = 1024;
         this.commands.put(CM.HELP, new Command("/help", "Type /help for command list."));
         this.commands.put(CM.NAME, new Command("/name", "Type /name <new username> to change your name."));
         this.commands.put(CM.IP, new Command("/ip", "Type /ip <new ipaddress> to change the targeted chat server."));
@@ -157,7 +157,7 @@ public class Client {
     }
 
     private void initMessageReceiver() {
-        this.messageReceiver = new MessageReceiver(this.targetServerPort, this.sendSocket);
+        this.messageReceiver = new MessageReceiver(this.bufferSize, this.sendSocket);
     }
 
     private void startFileThread(final String receiverName, final String path) {
