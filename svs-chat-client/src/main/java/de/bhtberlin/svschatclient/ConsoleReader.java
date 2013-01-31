@@ -26,10 +26,12 @@ public class ConsoleReader implements Runnable {
     String name;
     String serverAddress;
     String receiverName;
+    InetAddress iaddr;
     private Map<Enum, Command> commands = new HashMap<Enum, Command>();
 
-    public ConsoleReader(BlockingQueue bq) {
+    public ConsoleReader(BlockingQueue bq, InetAddress iaddr) {
         this.bq = bq;
+        this.iaddr = iaddr;
         this.commands.put(ConsoleReader.CM.HELP, new Command("/help", "Type /help for command list."));
         this.commands.put(ConsoleReader.CM.NAME, new Command("/name", "Type /name <new username> to change your name."));
         this.commands.put(ConsoleReader.CM.IP, new Command("/ip", "Type /ip <new ipaddress> to change the targeted chat server."));
@@ -65,8 +67,8 @@ public class ConsoleReader implements Runnable {
         return null;
     }
 
-    private void initFileSender(File file) {
-        FileSender fs = new FileSender(receiverName, file, 9603, lookupIP("85.178.207.95"));
+    private void initFileSender(File file, final InetAddress iaddr) {
+        FileSender fs = new FileSender(receiverName, file, 9603, iaddr);
         Thread t4 = new Thread(fs);
         t4.start();
     }
@@ -88,7 +90,7 @@ public class ConsoleReader implements Runnable {
             } else if (token.matches(commands.get(ConsoleReader.CM.FILE).getValue())) {
                 receiverName = st.nextToken();
                 String path = st.nextToken();
-                startFileThread(receiverName, path);
+                startFileThread(receiverName, path, this.iaddr);
             }
             /*else {
              sendMessage("/" + this.name + ":" + input);
@@ -97,9 +99,9 @@ public class ConsoleReader implements Runnable {
         }
     }
 
-    private void startFileThread(String receiverName, String path) {
+    private void startFileThread(String receiverName, String path, InetAddress iaddr) {
         File file = new File(path);
-        initFileSender(file);
+        initFileSender(file,iaddr);
     }
 
     private void showUsage() {

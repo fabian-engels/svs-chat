@@ -25,8 +25,12 @@ public class Main {
         main.init();
     }
     BlockingQueue<String> bq = new ArrayBlockingQueue<String>(1000);
+    InetAddress iaddr;
 
     private void init() {
+        iaddr = lookupIP("85.178.207.95");
+        
+        
         this.initMessageReceiver();
         this.iniFileReceiver();
         this.initMessageSender();
@@ -34,7 +38,7 @@ public class Main {
     }
 
     private void initConsoleReader() {
-        ConsoleReader cr = new ConsoleReader(bq);
+        ConsoleReader cr = new ConsoleReader(bq, iaddr);
         Thread t3 = new Thread(cr);
         t3.start();
     }
@@ -57,7 +61,7 @@ public class Main {
     private void initMessageSender() {
         MessageSender mss = null;
         try {
-            mss = new MessageSender(9600, lookupIP("85.178.207.95"), new DatagramSocket(0), bq);
+            mss = new MessageSender(9600, iaddr, new DatagramSocket(0), bq);
         } catch (SocketException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
