@@ -81,7 +81,6 @@ public class Server {
             tmpnames.add(name);
             clients.put(srcAddress, tmpnames);
 
-            execCommands(packet);
             sendResponse(packet);
         }
     }
@@ -103,7 +102,6 @@ public class Server {
         new Server().run();
     }
    
-
     private synchronized List<InetAddress> getInetAddressByName(String name) {
         List<InetAddress> listInet = new ArrayList<InetAddress>();
         for (InetAddress iaddr : this.clients.keySet()) {
@@ -122,11 +120,6 @@ public class Server {
     private void sendResponse(final DatagramPacket packet) {
         Logger.getLogger(Server.class.getName()).log(Level.INFO, "responde() :: " + new String(packet.getData()));
 
-        /*String name = splitNameAndText(packet);
-         if (name == null) {
-         return;
-         }*/
-
         StringTokenizer st = new StringTokenizer(new String(packet.getData()));
         String name = st.nextToken(":");
         String text = st.nextToken(":");
@@ -140,73 +133,12 @@ public class Server {
                 dp.setPort(this.sendToPort);
                 this.sendSocket.send(dp);
                 System.out.println("Packet send   : " + new String(dp.getData()));
-                System.out.println("Packet send to: " + packet.getAddress() + ":" + dp.getPort());
+                System.out.println("Packet send to: " + dp.getAddress() + ":" + dp.getPort());
                 System.out.println("Packet send at: " + GregorianCalendar.getInstance().getTime().toString());
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         }
-    }
-
-  
-
-    private void execCommands(final DatagramPacket packet) {
-        byte[] data = packet.getData();
-        String text = null;
-        try {
-            text = new String(data, "UTF8");
-            System.out.println("Received Data: " + text);
-
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        Pattern closePat = Pattern.compile("/close.+");
-        Pattern filePat = Pattern.compile(".+/file.+");
-        Pattern unknownPat = Pattern.compile("unknown");
-
-        if (closePat.matcher(text).matches()) {
-            clients.remove(packet.getAddress());
-        }
-        if (unknownPat.matcher(text).matches()) {
-            //@TODO notify new client
-        }
-        /*  if (filePat.matcher(text).matches()) {
-
-         String[] split = text.split("/file ");
-         if (split == null) {
-         // no file as argument
-         } else {
-         InetAddress destinationAddress = null;
-         String[] split1 = split[1].split(":");
-         destinationAddress = getInetAddrByName(split1[0]);
-
-               
-         DatagramSocket serverSocket = null;
-         try {
-         serverSocket = new DatagramSocket();
-         } catch (SocketException ex) {
-         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-         }
-         int fileTransferPort = serverSocket.getLocalPort();
-                
-         if(destinationAddress==null){
-         return;
-         }
-                
-         Thread thread = new Thread(new FileTransferHandler(bufferSize, destinationAddress, serverSocket));
-         thread.start();
-         String fileMsg = "filetrans@" + fileTransferPort;
-         try {
-         byte[] da00ta = fileMsg.getBytes();
-         DatagramPacket dp = new DatagramPacket(da00ta, da00ta.length, packet.getAddress(), this.sendToPort);
-         this.sendSocket.send(dp);
-         } catch (Exception ex) {
-         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-         }
-
-         }
-         }*/
     }
 }
