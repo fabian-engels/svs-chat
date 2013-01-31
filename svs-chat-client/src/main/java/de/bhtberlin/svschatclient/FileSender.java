@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,15 +23,26 @@ import java.util.logging.Logger;
  */
 class FileSender implements Runnable {
 
-    private final DatagramSocket sendSocket;
-    private final int targetServerPort;
-    private final InetAddress serverAddress;
-    private final File file;
-    private final String receiverName; //TODO implementieren
+    private  DatagramSocket sendSocket;
+    private  int targetServerPort;
+    private  InetAddress serverAddress;
+    private  File file;
+    private  String receiverName; //TODO implementieren
 
-    public FileSender(final String receiverName, final File file, final int targetServerPort, final InetAddress serverAddress, final DatagramSocket socket) {
+    /**
+     * 
+     * @param receiverName
+     * @param file
+     * @param targetServerPort
+     * @param serverAddress 
+     */
+    public FileSender(final String receiverName, final File file, final int targetServerPort, final InetAddress serverAddress) {
         this.file = file;
-        this.sendSocket = socket;
+        try {
+            this.sendSocket = new DatagramSocket(0);
+        } catch (SocketException ex) {
+            Logger.getLogger(FileSender.class.getName()).log(Level.SEVERE, null, ex);
+        }
         this.targetServerPort = targetServerPort;
         this.serverAddress = serverAddress;
         this.receiverName = receiverName;
