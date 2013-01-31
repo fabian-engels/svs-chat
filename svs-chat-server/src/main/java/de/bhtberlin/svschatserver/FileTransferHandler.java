@@ -37,8 +37,10 @@ public class FileTransferHandler implements Runnable {
         } catch (SocketException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
-        DatagramPacket dgp = new DatagramPacket(new byte[1024], 1024);
-        while (!Thread.currentThread().isAlive()) {
+        String s ="/part";
+        int slen = s.getBytes().length;
+        DatagramPacket dgp = new DatagramPacket(new byte[slen+1024], slen+1024);
+        while (true) {
             try {
                 dgs.receive(dgp);
                 DatagramPacket outdgp = new DatagramPacket(dgp.getData(), dgp.getData().length);
@@ -49,11 +51,11 @@ public class FileTransferHandler implements Runnable {
 
                 dgp.setPort(9604);
                 List<InetAddress> list;
-                list = getInetAddressByName(name);
+                //list = getInetAddressByName(name);
                 
                 Logger.getLogger(Server.class.getName()).log(Level.INFO,"Known hosts: ");
                 
-                for (InetAddress iaddr : list) {
+                for (InetAddress iaddr : this.clients.keySet()) {
                     Logger.getLogger(Server.class.getName()).log(Level.INFO, iaddr.getHostAddress());
                     dgp.setAddress(iaddr);
                     dgs.send(dgp);
