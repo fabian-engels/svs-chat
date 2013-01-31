@@ -50,7 +50,11 @@ public class FileTransferHandler implements Runnable {
                 dgp.setPort(9603);
                 List<InetAddress> list;
                 list = getInetAddressByName(name);
+                
+                Logger.getLogger(Server.class.getName()).log(Level.INFO,"Known hosts: ");
+                
                 for (InetAddress iaddr : list) {
+                    Logger.getLogger(Server.class.getName()).log(Level.INFO, iaddr.getHostAddress());
                     dgp.setAddress(iaddr);
                     dgs.send(dgp);
                 }
