@@ -64,9 +64,10 @@ public class Server {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            InetAddress srcAddress = packet.getAddress();
-            System.out.println("Received from IP:" + srcAddress + ":" + packet.getPort());
-            String text = new String(packet.getData());
+            InetAddress srcAddress = this.packet.getAddress();
+            System.out.println("Received from IP:" + srcAddress + ":" + this.packet.getPort());
+            String text = new String(this.packet.getData());
+            
             StringTokenizer st = new StringTokenizer(text, ":");
             String name = st.nextToken();
             if (name == null) {
