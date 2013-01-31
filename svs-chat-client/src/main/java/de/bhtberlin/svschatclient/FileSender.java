@@ -61,7 +61,7 @@ class FileSender implements Runnable {
                 dp = new DatagramPacket(data, 1024);
                 dp.setPort(this.targetServerPort);
                 dp.setAddress(this.serverAddress);
-                sendSocket.send(dp);
+                sendSocket.send(dp); // send?
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(FileSender.class.getName()).log(Level.SEVERE, null, ex);
