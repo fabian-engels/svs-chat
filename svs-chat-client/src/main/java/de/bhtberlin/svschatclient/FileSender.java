@@ -69,7 +69,7 @@ class FileSender implements Runnable {
                 }else{
                     s="/part ";
                 }
-                byte[] both = ArrayUtils.addAll(s.getBytes(), dp.getData());
+                byte[] both = ArrayUtils.addAll(s.getBytes(),data);
                 dp = new DatagramPacket(both, both.length);
                 dp.setPort(this.targetServerPort);
                 dp.setAddress(this.serverAddress);

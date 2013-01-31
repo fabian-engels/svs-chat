@@ -49,42 +49,45 @@ class FileReceiver implements Runnable {
             }
         }
     }
-    
     File file;
-    int offset=0;
+    int offset = 0;
     FileOutputStream fo;
+
     private void handleFilePackage(final byte[] input) {
         StringTokenizer st = new StringTokenizer(new String(input));
-        while (st.hasMoreTokens()) {
-            String token = st.nextToken();
-            if (token.matches("/file .+")) {
-                String name = st.nextToken();
-                file = new File(st.nextToken());
-                try {
-                    file.createNewFile();
-                } catch (IOException ex) {
-                    Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        String token = st.nextToken();
+        byte[] cleanInput = new String(input).trim().substring(token.length()+1).getBytes();
+        if (token.matches("/file")) {
+            String name = st.nextToken();
+            file = new File("J:\\data.txt");
+            offset = 0;
+            try {
+                file.createNewFile();
+            } catch (IOException ex) {
+                Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (token.matches("/eofe .+")) {
-                try {
-                    fo.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else if (token.matches("/part .+")) {
-                try {
-                    fo = new FileOutputStream(file);
-                    try {
-                        fo.write(input, offset, input.length);
-                        offset += input.length;
-                    } catch (IOException ex) {
-                        Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
+            try {
+                fo = new FileOutputStream(file);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                fo.write(cleanInput);
+            } catch (IOException ex) {
+                Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        if (token.matches("/eofe")) {
+            try {
+                fo.close();
+            } catch (IOException ex) {
+                Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (token.matches("/part")) {
+            try {
+                fo.write(cleanInput);
+            } catch (IOException ex) {
+                Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
