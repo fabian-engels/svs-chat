@@ -19,12 +19,18 @@ import java.util.logging.Logger;
  * @author nto
  */
  class MessageSender implements Runnable {
+    private final Logger LOGGER = Logger.getLogger(MessageSender.class.getName());
         private final BlockingQueue<String> messageQueue;
         private final DatagramSocket sendSocket;
         private final int targetServerPort;
         private final InetAddress serverAddress;
         
-        public MessageSender(final int targetServerPort, final InetAddress serverAddress, final DatagramSocket socket, final BlockingQueue<String> queue){
+        public MessageSender(
+                final int targetServerPort,
+                final InetAddress serverAddress,
+                final DatagramSocket socket,
+                final BlockingQueue<String> queue)
+        {
             this.messageQueue = queue;
             this.sendSocket = socket;
             this.targetServerPort = targetServerPort;
@@ -35,18 +41,15 @@ import java.util.logging.Logger;
         public void run(){
             DatagramPacket dp = null;
             
-            /**
-             * @TODO fix IllegalStateException
-             */
             while(!Thread.currentThread().isInterrupted()) {
                 synchronized (this.messageQueue) {
                 if (this.messageQueue.isEmpty()) {
                         try {
                             this.messageQueue.wait();
                         } catch (IllegalMonitorStateException ex) {
-                            Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
+                            LOGGER.log(Level.SEVERE, null, ex);
                         } catch (InterruptedException ex) {
-                            Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
+                            LOGGER.log(Level.SEVERE, null, ex);
                         }
                     }
                 }
@@ -61,7 +64,7 @@ import java.util.logging.Logger;
                     try {
                         sendSocket.send(dp);
                     } catch (IOException ex) {
-                        Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
+                        LOGGER.log(Level.SEVERE, null, ex);
                     }
                 }
             }

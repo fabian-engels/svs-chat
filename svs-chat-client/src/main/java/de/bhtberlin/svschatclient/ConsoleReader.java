@@ -91,11 +91,9 @@ public class ConsoleReader implements Runnable {
                 receiverName = st.nextToken();
                 String path = st.nextToken();
                 startFileThread(receiverName, path, this.iaddr);
+            }else{
+                System.out.print(this.name + ": ");
             }
-            /*else {
-             sendMessage("/" + this.name + ":" + input);
-             }*/
-            System.out.print(this.name + ": ");
         }
     }
 
