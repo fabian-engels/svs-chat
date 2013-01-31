@@ -62,7 +62,7 @@ public class ConsoleReader implements Runnable {
         try {
             return InetAddress.getByName(value);
         } catch (UnknownHostException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
@@ -73,7 +73,13 @@ public class ConsoleReader implements Runnable {
         t4.start();
     }
 
-    private void handleConsoleInput(final String input) throws NoSuchElementException {
+    /**
+     * 
+     * @param input
+     * @throws NoSuchElementException 
+     */
+    private void handleConsoleInput(final String input)
+            throws NoSuchElementException {
         StringTokenizer st = new StringTokenizer(input);
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
@@ -109,6 +115,9 @@ public class ConsoleReader implements Runnable {
         }
     }
 
+    /**
+     * Commands as ENUMS.
+     */
     private enum CM {
         NAME, IP, QUIT, FILE, HELP
     }
