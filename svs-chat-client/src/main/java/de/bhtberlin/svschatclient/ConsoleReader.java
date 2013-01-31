@@ -109,7 +109,6 @@ public class ConsoleReader implements Runnable {
     }
 
     private enum CM {
-
         NAME, IP, QUIT, FILE, HELP
     }
 }

@@ -61,7 +61,7 @@ import java.util.logging.Logger;
                     try {
                         sendSocket.send(dp);
                     } catch (IOException ex) {
-                        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MessageSender.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
