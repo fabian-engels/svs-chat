@@ -28,6 +28,7 @@ public class Main {
 
     private void init() {
         this.initMessageReceiver();
+        this.iniFileReceiver();
         this.initMessageSender();
         this.initConsoleReader();
     }
@@ -62,5 +63,11 @@ public class Main {
         }
         Thread t2 = new Thread(mss);
         t2.start();
+    }
+
+    private void iniFileReceiver() {
+        FileReceiver fr = new FileReceiver(1024);
+        Thread t5 = new Thread(fr);
+        t5.start();
     }
 }
