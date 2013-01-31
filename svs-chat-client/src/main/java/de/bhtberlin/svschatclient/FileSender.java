@@ -12,8 +12,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * MessageSender pools the given queue for new messages and sends them out by
@@ -48,6 +50,10 @@ class FileSender implements Runnable {
         this.receiverName = receiverName;
     }
     
+    String s ="/part ";
+    int slen = s.getBytes().length;
+    
+    
     @Override
     public void run() {
         try {
@@ -56,13 +62,25 @@ class FileSender implements Runnable {
             FileInputStream fileInputStream;
             fileInputStream = new FileInputStream(file);
             byte[] data = new byte[1024];
-
+            int i =0;
             while(fileInputStream.read(data) != -1){
-                dp = new DatagramPacket(data, 1024);
+                
+                dp = new DatagramPacket(data, slen+1024);
                 dp.setPort(this.targetServerPort);
                 dp.setAddress(this.serverAddress);
+                if(i==0){
+                    s="/file ";
+                }else{
+                    s="/part ";
+                }
+                
+                byte[] both = ArrayUtils.addAll(s.getBytes(), dp.getData());
+                dp.setData(both);
                 sendSocket.send(dp); // send?
+                i++;
             }
+            dp.setData("/eofe ".getBytes());
+            sendSocket.send(dp);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(FileSender.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ioex){

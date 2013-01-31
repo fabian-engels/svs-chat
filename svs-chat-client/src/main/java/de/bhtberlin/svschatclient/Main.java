@@ -28,7 +28,8 @@ public class Main {
     InetAddress iaddr;
 
     private void init() {
-        iaddr = lookupIP("37.5.33.49");
+        //iaddr = lookupIP("85.178.223.97");
+        iaddr = lookupIP("127.0.0.1");
         
         this.initMessageReceiver();
         this.iniFileReceiver();
@@ -69,7 +70,9 @@ public class Main {
     }
 
     private void iniFileReceiver() {
-        FileReceiver fr = new FileReceiver(1024);
+        String s ="/part";
+        int slen = s.getBytes().length;
+        FileReceiver fr = new FileReceiver(slen+1024);
         Thread t5 = new Thread(fr);
         t5.start();
     }

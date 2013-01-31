@@ -66,13 +66,13 @@ class FileReceiver implements Runnable {
                     Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            if (token.matches("/eof .+")) {
+            if (token.matches("/eofe .+")) {
                 try {
                     fo.close();
                 } catch (IOException ex) {
                     Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } else if (token.matches("/part")) {
+            } else if (token.matches("/part .+")) {
                 try {
                     fo = new FileOutputStream(file);
                     try {
