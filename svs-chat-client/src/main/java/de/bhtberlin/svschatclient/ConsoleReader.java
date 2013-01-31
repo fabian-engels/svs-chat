@@ -46,7 +46,7 @@ public class ConsoleReader implements Runnable {
             handleConsoleInput(input);
             try {
                 synchronized (this.bq) {
-                    bq.add(input);
+                    bq.add("/name "+name+":"+input);
                     bq.notifyAll();
                 }
             } catch (NoSuchElementException ex) {
