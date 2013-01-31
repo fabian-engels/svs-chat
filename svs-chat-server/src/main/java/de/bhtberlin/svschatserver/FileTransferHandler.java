@@ -33,7 +33,7 @@ public class FileTransferHandler implements Runnable {
     public void run() {
         DatagramSocket dgs = null;
         try {
-            dgs = new DatagramSocket(0);
+            dgs = new DatagramSocket(9603);
         } catch (SocketException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -47,7 +47,7 @@ public class FileTransferHandler implements Runnable {
                 String command = st.nextToken();
                 String name = st.nextToken();
 
-                dgp.setPort(9603);
+                dgp.setPort(9604);
                 List<InetAddress> list;
                 list = getInetAddressByName(name);
                 
