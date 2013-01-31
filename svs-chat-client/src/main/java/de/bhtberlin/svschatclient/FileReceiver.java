@@ -1,6 +1,8 @@
 package de.bhtberlin.svschatclient;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -40,7 +42,7 @@ class FileReceiver implements Runnable {
                 try {
                     this.dp = new DatagramPacket(buf, buf.length);
                     receiveSocket.receive(this.dp);
-                    handleFilePackage(new String(this.dp.getData()));
+                    handleFilePackage(dp.getData());
                 } catch (IOException ex) {
                     Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -50,17 +52,40 @@ class FileReceiver implements Runnable {
     }
     
     File file;
-    private void handleFilePackage(final String input) {
-        StringTokenizer st = new StringTokenizer(input);
+    int offset=0;
+    FileOutputStream fo;
+    private void handleFilePackage(final byte[] input) {
+        StringTokenizer st = new StringTokenizer(new String(input));
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
             if (token.matches("/file .+")) {
                 String name = st.nextToken();
                 file = new File(st.nextToken());
+                try {
+                    file.createNewFile();
+                } catch (IOException ex) {
+                    Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             if (token.matches("/eof .+")) {
-                // = st.nextToken();
+                try {
+                    fo.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } else if (token.matches("/part")) {
+                try {
+                    fo = new FileOutputStream(file);
+                    try {
+                        fo.write(input, offset, input.length);
+                        offset += input.length;
+                    } catch (IOException ex) {
+                        Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
             }
         }
 

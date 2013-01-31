@@ -25,6 +25,7 @@ public class ConsoleReader implements Runnable {
     BlockingQueue<String> bq;
     String name;
     String serverAddress;
+    String receiverName;
     private Map<Enum, Command> commands = new HashMap<Enum, Command>();
 
     public ConsoleReader(BlockingQueue bq) {
@@ -65,7 +66,7 @@ public class ConsoleReader implements Runnable {
     }
 
     private void initFileSender(File file) {
-        FileSender fs = new FileSender("fileREceiver", file, 9602, lookupIP("85.178.207.95"));
+        FileSender fs = new FileSender(receiverName, file, 9603, lookupIP("85.178.207.95"));
         Thread t4 = new Thread(fs);
         t4.start();
     }
@@ -85,7 +86,7 @@ public class ConsoleReader implements Runnable {
             } else if (token.matches(commands.get(ConsoleReader.CM.QUIT).getValue())) {
                 //System.exit(0);
             } else if (token.matches(commands.get(ConsoleReader.CM.FILE).getValue())) {
-                String receiverName = st.nextToken();
+                receiverName = st.nextToken();
                 String path = st.nextToken();
                 startFileThread(receiverName, path);
             }
