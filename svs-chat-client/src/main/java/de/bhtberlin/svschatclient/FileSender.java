@@ -64,18 +64,15 @@ class FileSender implements Runnable {
             byte[] data = new byte[1024];
             int i =0;
             while(fileInputStream.read(data) != -1){
-                
-                dp = new DatagramPacket(data, slen+1024);
-                dp.setPort(this.targetServerPort);
-                dp.setAddress(this.serverAddress);
                 if(i==0){
                     s="/file ";
                 }else{
                     s="/part ";
                 }
-                
                 byte[] both = ArrayUtils.addAll(s.getBytes(), dp.getData());
-                dp.setData(both);
+                dp = new DatagramPacket(both, both.length);
+                dp.setPort(this.targetServerPort);
+                dp.setAddress(this.serverAddress);
                 sendSocket.send(dp); // send?
                 i++;
             }
