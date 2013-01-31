@@ -38,7 +38,6 @@ class FileReceiver implements Runnable {
 
         while (!Thread.currentThread().isInterrupted()) {
             synchronized (this) {
-
                 try {
                     this.dp = new DatagramPacket(buf, buf.length);
                     receiveSocket.receive(this.dp);
