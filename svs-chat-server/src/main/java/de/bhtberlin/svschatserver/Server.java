@@ -6,15 +6,19 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import sun.util.locale.StringTokenIterator;
 
 /**
  * SVS UDP Chat Server
@@ -29,7 +33,7 @@ public class Server {
     private DatagramSocket sendSocket;
     private DatagramSocket serverSocket;
     private DatagramPacket packet;
-    private Map<InetAddress, Set<String>> clients;
+    private final Map<InetAddress, Set<String>> clients;
     final Integer receivePort = 9600;
     final Integer sendFromPort = 9601;
     final Integer sendToPort = 9602;
@@ -38,8 +42,12 @@ public class Server {
     public Server() {
         this.clients = new HashMap<InetAddress, Set<String>>();
     }
-
+    
     public void run() {
+        FileTransferHandler fth = new FileTransferHandler(this.clients);
+        Thread t1 = new Thread(fth);
+        t1.start();
+        
         try {
             this.serverSocket = new DatagramSocket(this.receivePort);
             this.sendSocket = new DatagramSocket(this.sendFromPort);
@@ -93,6 +101,22 @@ public class Server {
     public static void main(String[] args) {
         new Server().run();
     }
+   
+
+    private synchronized List<InetAddress> getInetAddressByName(String name) {
+        List<InetAddress> listInet = new ArrayList<InetAddress>();
+        for (InetAddress iaddr : this.clients.keySet()) {
+            Set<String> names = this.clients.get(iaddr);
+            String tmpname;
+            for (Iterator<String> it = names.iterator(); it.hasNext();) {
+                tmpname = it.next();
+                if (tmpname.equals(names)) {
+                    listInet.add(iaddr);
+                }
+            }
+        }
+        return listInet;
+    }
 
     private void sendResponse(final DatagramPacket packet) {
         Logger.getLogger(Server.class.getName()).log(Level.INFO, "responde() :: " + new String(packet.getData()));
@@ -109,31 +133,22 @@ public class Server {
 
         /*  */
         for (InetAddress iaddr : clients.keySet()) {
-                    try {
-                        DatagramPacket dp = new DatagramPacket(packet.getData(), packet.getData().length);
-                        dp.setAddress(iaddr);
-                        dp.setPort(this.sendToPort);
-                        this.sendSocket.send(dp);
-                        System.out.println("Packet send   : " + new String(dp.getData()));
-                        System.out.println("Packet send to: " + packet.getAddress() + ":" + dp.getPort());
-                        System.out.println("Packet send at: " + GregorianCalendar.getInstance().getTime().toString());
-                    } catch (IOException ex) {
-                        Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
-        }
-    }
-
-    private InetAddress getInetAddrByName(String name) {
-        Set<String> tmpSet;
-        for (InetAddress iaddr : this.clients.keySet()) {
-            tmpSet = this.clients.get(iaddr);
-            if (tmpSet.contains(name)) {
-                return iaddr;
+            try {
+                DatagramPacket dp = new DatagramPacket(packet.getData(), packet.getData().length);
+                dp.setAddress(iaddr);
+                dp.setPort(this.sendToPort);
+                this.sendSocket.send(dp);
+                System.out.println("Packet send   : " + new String(dp.getData()));
+                System.out.println("Packet send to: " + packet.getAddress() + ":" + dp.getPort());
+                System.out.println("Packet send at: " + GregorianCalendar.getInstance().getTime().toString());
+            } catch (IOException ex) {
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
+
         }
-        return null;
     }
+
+  
 
     private void execCommands(final DatagramPacket packet) {
         byte[] data = packet.getData();

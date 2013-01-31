@@ -8,6 +8,13 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,32 +23,55 @@ import java.util.logging.Logger;
  * @author nto
  */
 public class FileTransferHandler implements Runnable {
-    
-    private DatagramSocket serverSocket;
-    private DatagramPacket packet;
-    private InetAddress destination;
-    private final int bufferSize;
-    
-    public FileTransferHandler(int buffersize, InetAddress destination, DatagramSocket serverSocket) {
-        this.serverSocket = serverSocket;
-        this.bufferSize = buffersize;
-        this.destination = destination;
+
+    Map<InetAddress, Set<String>> clients;
+
+    FileTransferHandler(final Map<InetAddress, Set<String>> clients) {
+        this.clients = clients;
     }
-    
+
     public void run() {
-        while(true) {
-              try {
-                this.packet = new DatagramPacket(new byte[this.bufferSize], this.bufferSize); 
-                this.serverSocket.receive(this.packet);
-                this.packet.setAddress(destination);
-                this.serverSocket.send(packet);
-                if(this.packet.getLength()!=this.bufferSize){
-                    this.serverSocket.close();
-                    return;
+        DatagramSocket dgs = null;
+        try {
+            dgs = new DatagramSocket(0);
+        } catch (SocketException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        DatagramPacket dgp = new DatagramPacket(new byte[1024], 1024);
+        while (!Thread.currentThread().isAlive()) {
+            try {
+                dgs.receive(dgp);
+                DatagramPacket outdgp = new DatagramPacket(dgp.getData(), dgp.getData().length);
+
+                StringTokenizer st = new StringTokenizer(new String(dgp.getData()));
+                String command = st.nextToken();
+                String name = st.nextToken();
+
+                dgp.setPort(9603);
+                List<InetAddress> list;
+                list = getInetAddressByName(name);
+                for (InetAddress iaddr : list) {
+                    dgp.setAddress(iaddr);
+                    dgs.send(dgp);
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    private synchronized List<InetAddress> getInetAddressByName(String name) {
+        List<InetAddress> listInet = new ArrayList<InetAddress>();
+        for (InetAddress iaddr : this.clients.keySet()) {
+            Set<String> names = this.clients.get(iaddr);
+            String tmpname;
+            for (Iterator<String> it = names.iterator(); it.hasNext();) {
+                tmpname = it.next();
+                if (tmpname.equals(names)) {
+                    listInet.add(iaddr);
+                }
+            }
+        }
+        return listInet;
     }
 }
