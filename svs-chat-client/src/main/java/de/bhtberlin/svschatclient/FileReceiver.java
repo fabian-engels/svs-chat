@@ -30,7 +30,7 @@ class FileReceiver implements Runnable {
     public void run() {
 
         try {
-            this.receiveSocket = new DatagramSocket(9603);
+            this.receiveSocket = new DatagramSocket(9604);
         } catch (SocketException ex) {
             Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -45,7 +45,7 @@ class FileReceiver implements Runnable {
                 } catch (IOException ex) {
                     Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                System.out.println("Received: " + new String(this.dp.getData()));
+                System.out.println("Received FileData: " + new String(this.dp.getData()));
             }
         }
     }

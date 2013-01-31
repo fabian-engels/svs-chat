@@ -28,8 +28,7 @@ public class Main {
     InetAddress iaddr;
 
     private void init() {
-        iaddr = lookupIP("127.0.0.1");
-        
+        iaddr = lookupIP("37.5.33.49");
         
         this.initMessageReceiver();
         this.iniFileReceiver();
