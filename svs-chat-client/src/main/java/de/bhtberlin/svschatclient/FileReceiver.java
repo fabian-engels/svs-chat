@@ -56,7 +56,7 @@ class FileReceiver implements Runnable {
     private void handleFilePackage(final byte[] input) {
         StringTokenizer st = new StringTokenizer(new String(input));
         String token = st.nextToken();
-        byte[] cleanInput = new String(input).trim().substring(token.length()+1).getBytes();
+        byte[] cleanInput = new String(input).trim().substring(token.length() + 1).getBytes();
         if (token.matches("/file")) {
             String name = st.nextToken();
             file = new File("J:\\data.txt");
@@ -76,8 +76,7 @@ class FileReceiver implements Runnable {
             } catch (IOException ex) {
                 Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-        if (token.matches("/eofe")) {
+        } else if (token.matches("/eofe")) {
             try {
                 fo.close();
             } catch (IOException ex) {

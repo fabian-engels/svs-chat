@@ -68,7 +68,7 @@ public class ConsoleReader implements Runnable {
     }
 
     private void initFileSender(File file, final InetAddress iaddr) {
-        FileSender fs = new FileSender(receiverName, file, 9604, iaddr);
+        FileSender fs = new FileSender(receiverName, file, 9603, iaddr);
         Thread t4 = new Thread(fs);
         t4.start();
     }
