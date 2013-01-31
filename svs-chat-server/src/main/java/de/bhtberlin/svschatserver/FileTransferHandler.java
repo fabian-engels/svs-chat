@@ -26,7 +26,7 @@ public class FileTransferHandler implements Runnable {
 
     Map<InetAddress, Set<String>> clients;
 
-    FileTransferHandler(final Map<InetAddress, Set<String>> clients) {
+    FileTransferHandler(Map<InetAddress, Set<String>> clients) {
         this.clients = clients;
     }
 
